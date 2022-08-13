@@ -142,7 +142,7 @@ router.post("/session/start", async (req, res) => {
         ],
         scale: {
           maxReplicas: 1,
-          minReplicas: 1,
+          minReplicas: 0,
         },
         volumes: [
           {

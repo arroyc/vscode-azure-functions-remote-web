@@ -45,7 +45,6 @@ router.put("/staging", (req, res) => {
       const file = new AdmZip(stagingDirectoryPath + "/" + zipFileName);
       console.log("After ADM zip");
       file.extractAllTo(stagingDirectoryPath);
-      res.send("Successfully unzipped");
       const timestamp = Date.now();
       var newFileName = zipFileName;
       var arr = newFileName.split(".");
