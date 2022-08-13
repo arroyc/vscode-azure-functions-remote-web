@@ -32,7 +32,7 @@ router.get("/pat", (req, res) => {
   timer = setTimeout(() => {
     console.log("Inactive timeout");
     process.exit(0);
-  }, 15000);
+  }, 150000);
   return res.send("ok");
 });
 
