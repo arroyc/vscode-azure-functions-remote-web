@@ -168,20 +168,20 @@ router.post("/session/start", async (req, res) => {
         containerAppEnvelope
       );
 
-    // call file sync method
-    await fileManager.syncCode();
-    const reqBody = {
-      stagingDirectoryPath: "/functionapp/Staging",
-      zipFileName: "funcapppy.zip",
-    };
+    // // call file sync method
+    // await fileManager.syncCode();
+    // const reqBody = {
+    //   stagingDirectoryPath: "/functionapp/Staging",
+    //   zipFileName: "funcapppy.zip",
+    // };
 
-    const hostname = workerContainer.configuration.ingress.fqdn;
-    console.log(`Hostname: ${hostname} at ${new Date().toISOString()}`);
-    // Call staging endpoint here
-    axios.put(`https://${hostname}:443/limelight/staging`, reqBody);
-    console.log(
-      `${reqBody.zipFileName} has been unzipped at ${reqBody.stagingDirectoryPath}`
-    );
+    // const hostname = workerContainer.configuration.ingress.fqdn;
+    // console.log(`Hostname: ${hostname} at ${new Date().toISOString()}`);
+    // // Call staging endpoint here
+    // axios.put(`https://${hostname}:443/limelight/staging`, reqBody);
+    // console.log(
+    //   `${reqBody.zipFileName} has been unzipped at ${reqBody.stagingDirectoryPath}`
+    // );
 
     // fileManager
     //   .syncCode()
