@@ -168,12 +168,12 @@ router.post("/session/start", async (req, res) => {
         containerAppEnvelope
       );
 
-    // // call file sync method
-    // await fileManager.syncCode();
-    // const reqBody = {
-    //   stagingDirectoryPath: "/functionapp/Staging",
-    //   zipFileName: "funcapppy.zip",
-    // };
+    // call file sync method
+    await fileManager.syncCode();
+    const reqBody = {
+      stagingDirectoryPath: "/functionapp/Staging",
+      zipFileName: "funcapppy.zip",
+    };
 
     // const hostname = workerContainer.configuration.ingress.fqdn;
     // console.log(`Hostname: ${hostname} at ${new Date().toISOString()}`);
