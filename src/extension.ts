@@ -5,22 +5,6 @@ import * as vscode from 'vscode';
 import { checkForUpdates } from './web/launcher';
 
 export async function activate(context: vscode.ExtensionContext) {
-    function registerResourceLabelFormatter(authority: string, ciDisplayName: string) {
-        context.subscriptions.push(
-            vscode.workspace.registerResourceLabelFormatter({
-                scheme: 'vscode-remote',
-                authority,
-                formatting: {
-                    label: '${path}',
-                    separator: '/',
-                    workspaceSuffix: ciDisplayName,
-                    tildify: true,
-                    normalizeDriveLetter: true
-                }
-            })
-        );
-    }
-
     function getMyWebviewContent(webview: vscode.Webview, context: any): string { 
         let html: string = ``;
         
@@ -59,41 +43,6 @@ export async function activate(context: vscode.ExtensionContext) {
             
                 // And set its HTML content
                 panel.webview.html = getMyWebviewContent(panel.webview, context);   // <--- HTML
-            }
-        }),
-        vscode.commands.registerCommand('vscode-azure-functions-remote-web.helloWorld', () => {
-         	vscode.window.showInformationMessage('Hello World!');
-        }),
-        vscode.commands.registerCommand('azureml-remote.browser.isConnectedToRemote', async (authority: string, ciDisplayName: string) => {
-            registerResourceLabelFormatter(authority, ciDisplayName);
-            setTimeout(() => checkForUpdates(), 3_000);
-        }),
-        vscode.commands.registerCommand('azureml-remote.browser.generateComputeInstanceUrl', async () => {
-            const computeInstanceId = await vscode.window.showInputBox({
-                prompt: 'Enter the Compute instance id',
-                ignoreFocusOut: true,
-                placeHolder:
-                    '/subscriptions/{SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/Microsoft.MachineLearningServices/workspaces/{WORKSPACE_NAME}/computes/${COMPUTE_INSTANCE_NAME}'
-            });
-            if (!computeInstanceId) {
-                throw new Error('Compute instance id is rquired');
-            }
-
-            const encodedComputeInstanceId = btoa(computeInstanceId);
-            // /subscriptions/b856ff87-00d1-4205-af56-3af5435ae401/resourceGroups/sevillal_ws_rg/providers/Microsoft.MachineLearningServices/workspaces/sevillal_ws/computes/sevillal-ci-test
-            const url = `https://insiders.vscode.dev/+ms-toolsai.vscode-ai-remote-web/${encodedComputeInstanceId}/home/azureuser/cloudfiles/code`;
-            console.log(url);
-
-            const result: string | undefined = await vscode.window.showInformationMessage(
-                `Copy the following url to your browser to connect to the Compute instance: ${url}`,
-                { modal: true },
-                'Copy',
-                'Open'
-            );
-            if (result === 'Copy') {
-                await vscode.env.clipboard.writeText(url);
-            } else if (result === 'Open') {
-                await vscode.env.openExternal(vscode.Uri.parse(url));
             }
         })
     );
