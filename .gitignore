@@ -243,3 +243,6 @@ pyvenv.cfg
 .vscode-test-web
 
 package-lock.json
+
+# local app.js file
+app_local.js

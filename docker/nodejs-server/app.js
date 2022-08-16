@@ -53,7 +53,9 @@ router.put("/staging", (req, res) => {
         stagingDirectoryPath + "/" + zipFileName,
         stagingDirectoryPath + "/" + newFileName,
         function (err) {
-          if (err) console.log("ERROR: " + err);
+          if (err) {
+            console.log("ERROR: " + err);
+          }
         }
       );
       res.send("Renamed zip to " + newFileName);
@@ -61,7 +63,7 @@ router.put("/staging", (req, res) => {
       console.log(error.message);
       res.send("unzipping failed");
     }
-  }, 5000);
+  }, 2000);
 });
 
 router.post("/code-server/start", (req, res) => {
@@ -70,40 +72,26 @@ router.post("/code-server/start", (req, res) => {
   const tunnelName = req.body.tunnelName;
 
   const cluster = req.body.cluster;
-  // const tunnelName = tunnelId + "." + cluster;
   const { spawn } = require("child_process");
 
-  // return exec(`ls`, (error, stdout, stderr) => {
-  //   if (error) {
-  //       console.log(`error: ${error.message}`);
-  //       return res.send(`error: ${error.message}`)
-  //   }
-  //   if (stderr) {
-  //       console.log(`stderr: ${stderr}`);
-  //       return res.send(`stderr: ${stderr}`)
-  //   }
-  //   console.log(`stdout: ${stdout}`);
-  //   res.send(`stdout: ${stdout}`)
-  // });
-
-  ls = spawn(
+  const ls = spawn(
     `yes | code-server --accept-server-license-terms --verbose serve --tunnel-id ${tunnelName} --host-token ${hostToken} --tunnel-name ${tunnelName} --cluster ${cluster} --port 8000`,
     { cwd: "/root", shell: true, detached: true }
   );
-  client_url = undefined;
+  let client_url = undefined;
 
   ls.stdout.on(`data`, (data) => {
-    console.log(new Buffer.from(data).toString());
+    console.log(Buffer.from(data).toString());
     // console.log(new Buffer(data).toString('ascii'))
     // return res.send(data)
   });
 
   ls.stderr.on("data", (data) => {
     console.error(`stderr: ${data}`);
-    const url_Ind = data.indexOf("https");
-    if (url_Ind >= 0) {
-      client_url = data.toString().substring(url_Ind);
-    }
+    // const url_Ind = data.indexOf("https");
+    // if (url_Ind >= 0) {
+    //   client_url = data.toString().substring(url_Ind);
+    // }
   });
 
   ls.on("close", (code) => {
@@ -111,9 +99,9 @@ router.post("/code-server/start", (req, res) => {
     // console.log(dataBuffer.toString())
   });
 
-  setTimeout(() => {
-    return res.send(client_url);
-  }, 15000);
+  // setTimeout(() => {
+  //   return res.send(client_url);
+  // }, 150000);
 });
 
 app.use("/limelight", router);

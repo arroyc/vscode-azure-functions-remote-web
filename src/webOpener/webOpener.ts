@@ -212,43 +212,12 @@ export default async function doRoute(
   }
 
   if (!tunnel) {
-    // delete
     localStorage.removeItem("tunnel-def");
-
-    await pRetry(
-      async () => {
-        tunnel = await Basis.createTunnelWithPort(accessToken, 8000);
-        localStorage.setItem("tunnel-def", JSON.stringify(tunnel));
-      },
-      {
-        onFailedAttempt: async (error) => {
-          console.log(
-            `Deleting inactive tunnels as max tunnel count limit for user reached`
-          );
-          return await Basis.deleteInactiveTunnels(accessToken);
-        },
-        retries: 3,
-      }
-    );
-
-    // try {
-    //   tunnel = await Basis.createTunnelWithPort(accessToken, 8000);
-    //   localStorage.setItem("tunnel-def", JSON.stringify(tunnel));
-    // } catch (e) {
-    //   console.log(e);
-    //   // TODO: send toast err msg to user, find inactive tunnels and prompt user whether to delete
-    //   await Basis.deleteInactiveTunnels(accessToken);
-    // }
+    tunnel = await Basis.createTunnelWithPort(accessToken, 8000);
   }
-
-  // Look up container info in cache
 
   // Call container api hosted at the container app ip
   console.log(tunnel);
-  // if tunnel exists,
-  //    if active, conn
-  //    if not, kill it, create new update localstorage
-  // if tunnel not exists, create new update localstorage
   const tunnelActive = await Basis.isActive(accessToken, tunnel);
   if (!tunnelActive) {
     // If not, call api server to create and return a new container app
@@ -257,7 +226,8 @@ export default async function doRoute(
     try {
       console.log("extension call session/start");
       const containerInfo = await axios.post(
-        "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443/limelight/session/start",
+        "http://localhost:443/limelight/session/start",
+        // "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443/limelight/session/start",
         {
           // TODO: pass in custom container app name, if not exist, create one with the name otherwise return the info
           calledWhen: new Date().toISOString(),
