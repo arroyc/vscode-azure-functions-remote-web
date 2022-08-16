@@ -2,10 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import {
-  TunnelRelayTunnelClient,
-  TunnelRelayTunnelHost,
-} from "@vs/tunnels-connections";
+import { TunnelRelayTunnelClient } from "@vs/tunnels-connections";
 import {
   Tunnel,
   TunnelAccessControlEntry,
@@ -17,7 +14,7 @@ import {
 } from "@vs/tunnels-management";
 import { SshStream } from "@vs/vs-ssh";
 import { IServerTunnel } from "./types";
-const retry = require("async-retry");
+import pRetry from "p-retry";
 
 let tunnelManagementClientImpl: TunnelManagementHttpClient;
 
@@ -147,42 +144,60 @@ export namespace Basis {
     accessToken: string,
     portNumber: number
   ): Promise<any> {
-    tunnelManagementClientImpl = tunnelManagementClientImpl
-      ? tunnelManagementClientImpl
-      : new TunnelManagementHttpClient(
-          "vscode.dev.azurefunctions-remote-web",
-          () => Promise.resolve(`Bearer ${accessToken}`)
+    return pRetry(
+      async () => {
+        tunnelManagementClientImpl = tunnelManagementClientImpl
+          ? tunnelManagementClientImpl
+          : new TunnelManagementHttpClient(
+              "vscode.dev.azurefunctions-remote-web",
+              () => Promise.resolve(`Bearer ${accessToken}`)
+            );
+        let tunnelAccessControlEntry: TunnelAccessControlEntry = {
+          type: TunnelAccessControlEntryType.Anonymous,
+          subjects: [],
+          scopes: ["manage"],
+        };
+
+        const tunnel: Tunnel = {
+          name: makeString(),
+          ports: [{ portNumber: portNumber, protocol: "auto" }],
+          accessControl: {
+            entries: [tunnelAccessControlEntry],
+          },
+        };
+        let tunnelRequestOptions: TunnelRequestOptions = {
+          tokenScopes: ["manage"],
+          includePorts: true,
+        };
+
+        let tunnelInstance = await tunnelManagementClientImpl.createTunnel(
+          tunnel,
+          tunnelRequestOptions
         );
-    let tunnelAccessControlEntry: TunnelAccessControlEntry = {
-      type: TunnelAccessControlEntryType.Anonymous,
-      subjects: [],
-      scopes: ["manage"],
-    };
 
-    const tunnel: Tunnel = {
-      name: makeString(),
-      ports: [{ portNumber: portNumber, protocol: "auto" }],
-      accessControl: {
-        entries: [tunnelAccessControlEntry],
+        return {
+          tunnelId: tunnelInstance!.tunnelId!,
+          name: tunnelInstance!.name,
+          remotePort: portNumber,
+          token: tunnelInstance!.accessTokens?.manage,
+          clusterId: tunnelInstance!.clusterId,
+        };
       },
-    };
-    let tunnelRequestOptions: TunnelRequestOptions = {
-      tokenScopes: ["manage"],
-      includePorts: true,
-    };
+      {
+        onFailedAttempt: async (error: any) => {
+          //TODO: check err is limit error and delete
 
-    let tunnelInstance = await tunnelManagementClientImpl.createTunnel(
-      tunnel,
-      tunnelRequestOptions
+          if (error!.response?.status === 429) {
+            console.log(error);
+            console.log(
+              `Deleting inactive tunnels as max tunnel count limit for user reached`
+            );
+            return await Basis.deleteInactiveTunnels(accessToken);
+          }
+        },
+        retries: 3,
+      }
     );
-
-    return {
-      tunnelId: tunnelInstance!.tunnelId!,
-      name: tunnelInstance!.name,
-      remotePort: portNumber,
-      token: tunnelInstance!.accessTokens?.manage,
-      clusterId: tunnelInstance!.clusterId,
-    };
   }
 
   export async function isActive(

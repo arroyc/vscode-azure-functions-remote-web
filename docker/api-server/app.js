@@ -3,7 +3,6 @@ const express = require("express");
 const cors = require("cors");
 const uuid = require("uuid");
 
-const { ShareServiceClient } = require("@azure/storage-file-share");
 const {
   ManagedIdentityCredential,
   DefaultAzureCredential,
