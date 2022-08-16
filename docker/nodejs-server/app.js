@@ -102,6 +102,8 @@ router.post("/code-server/start", (req, res) => {
   // setTimeout(() => {
   //   return res.send(client_url);
   // }, 150000);
+
+  res.send("code server started");
 });
 
 app.use("/limelight", router);
