@@ -173,7 +173,7 @@ router.post("/session/start", async (req, res) => {
     const requestBody = {
       stagingDirectoryPath: "/functionapp/Staging/",
     };
-    await axios.put(`https://${hostname}:443/limelight/delete/zips`, requestBody);
+    axios.put(`https://${hostname}:443/limelight/delete/zips`, requestBody);
     console.log(
       `All existing zips have been deleted`
     );
