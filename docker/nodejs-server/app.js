@@ -107,26 +107,21 @@ router.put("/staging", async (req, res) => {
   try {
     const stagingDirectoryPath = req.body.stagingDirectoryPath;
     const zipFileName = req.body.zipFileName;
-    console.log("Before admzip" + stagingDirectoryPath + "/" + zipFileName);
+    console.log("Starting unzipping " + zipFileName + " at path: " + stagingDirectoryPath + "/" + zipFileName);
     const file = new AdmZip(stagingDirectoryPath + "/" + zipFileName);
-    console.log("After ADM zip");
     file.extractAllTo(stagingDirectoryPath);
     const timestamp = Date.now();
     var newFileName = zipFileName;
     var arr = newFileName.split(".");
     newFileName = arr[0] + timestamp.toString() + "." + arr[1];
-    fs.rename(
+    await fs.promises.rename(
       stagingDirectoryPath + "/" + zipFileName,
       stagingDirectoryPath + "/" + newFileName,
-      function (err) {
-        if (err) {
-          console.log("ERROR: " + err);
-        }
-      }
     );
+    console.log("Succesfully finished staging call")
     res.send("Renamed zip to " + newFileName);
   } catch (error) {
-    console.log(error.message);
+    console.log("Unzipping failed: " + error.message);
     res.send("unzipping failed");
   }
 });
