@@ -55,6 +55,7 @@ export const BASIS_SCOPES = [
   `${TunnelServiceProperties.production.serviceAppId}/.default`,
 ];
 const USER_AGENT = "vscode.dev.azure-functions-remote-web";
+const AzureAuthManager = require("./azureAuthUtility.js");
 var new_func_app = false;
 
 export interface IRouterWorkbench {
@@ -76,6 +77,8 @@ export interface IRouterWorkbench {
     ): Promise<R>;
   };
 }
+
+
 
 export default async function doRoute(
   route: IRouteResult,
@@ -105,55 +108,13 @@ export default async function doRoute(
     // path: '/root/.npm'
   });
   // Get aad token
-  const authenticate = async (
-    scopes: string[]
-  ): Promise<AuthenticationSession> => {
-    console.log(
-      `AzureFunctionRemote: Authenticating for scopes: ${scopes.join(", ")}`
-    );
-
-    const currentSessions = await extra.microsoftAuthentication.getSessions(
-      scopes
-    );
-
-    if (currentSessions.length > 0) {
-      const session = currentSessions[0];
-      const accessToken = await session.getAccessToken();
-      //Block while we're waiting for the current auth session to resolve
-      return await Promise.resolve({
-        id: session.id,
-        accessToken: accessToken,
-        account: session.account,
-        scopes: session.scopes,
-      });
-    }
-    // Create new auth sessions
-    const newSessions = await extra.microsoftAuthentication.getSessions(
-      scopes,
-      { forceNewSession: false }
-    );
-    if (newSessions.length === 0) {
-      throw new Error(
-        `Could not successfully authenticate into account. Please make sure you are logged into the correct account. You can reload and try again.`
-      );
-    }
-    const session = newSessions[0];
-    const accessToken = await session.getAccessToken();
-    // Block while we're waiting for the new auth session to resolve
-    return await Promise.resolve({
-      id: session.id,
-      accessToken: accessToken,
-      account: session.account,
-      scopes: session.scopes,
-    });
-  };
-
-  const session = await authenticate(BASIS_SCOPES);
+  var azureAuthManager = new AzureAuthManager(extra.microsoftAuthentication);
+  const session = await azureAuthManager.getAzureAuthSession(BASIS_SCOPES);
   console.log("Getting AAD session...");
   console.log(session);
   const accessToken = session.accessToken;
 
-  const azure_session = await authenticate([
+  const azure_session = await azureAuthManager.getAzureAuthSession([
     "https://management.azure.com/.default",
   ]);
 
@@ -212,12 +173,43 @@ export default async function doRoute(
   }
 
   if (!tunnel) {
+    // delete
     localStorage.removeItem("tunnel-def");
-    tunnel = await Basis.createTunnelWithPort(accessToken, 8000);
+
+    await pRetry(
+      async () => {
+        tunnel = await Basis.createTunnelWithPort(accessToken, 8000);
+        localStorage.setItem("tunnel-def", JSON.stringify(tunnel));
+      },
+      {
+        onFailedAttempt: async (error) => {
+          console.log(
+            `Deleting inactive tunnels as max tunnel count limit for user reached`
+          );
+          return await Basis.deleteInactiveTunnels(accessToken);
+        },
+        retries: 3,
+      }
+    );
+
+    // try {
+    //   tunnel = await Basis.createTunnelWithPort(accessToken, 8000);
+    //   localStorage.setItem("tunnel-def", JSON.stringify(tunnel));
+    // } catch (e) {
+    //   console.log(e);
+    //   // TODO: send toast err msg to user, find inactive tunnels and prompt user whether to delete
+    //   await Basis.deleteInactiveTunnels(accessToken);
+    // }
   }
+
+  // Look up container info in cache
 
   // Call container api hosted at the container app ip
   console.log(tunnel);
+  // if tunnel exists,
+  //    if active, conn
+  //    if not, kill it, create new update localstorage
+  // if tunnel not exists, create new update localstorage
   const tunnelActive = await Basis.isActive(accessToken, tunnel);
   if (!tunnelActive) {
     // If not, call api server to create and return a new container app
@@ -226,8 +218,7 @@ export default async function doRoute(
     try {
       console.log("extension call session/start");
       const containerInfo = await axios.post(
-        "http://localhost:443/limelight/session/start",
-        // "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443/limelight/session/start",
+        "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443/limelight/session/start",
         {
           // TODO: pass in custom container app name, if not exist, create one with the name otherwise return the info
           calledWhen: new Date().toISOString(),

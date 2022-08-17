@@ -11,7 +11,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:vscode-azure-functions-remote-web.helloWorld",
     "onCommand:mypanel.start"
   ],
   "browser": "./dist/web/extension.js",
@@ -21,10 +20,6 @@
       "import": "dist/webOpener.js"
     },
     "commands": [
-      {
-        "command": "vscode-azure-functions-remote-web.helloWorld",
-        "title": "Hello World"
-      },
       {
         "command": "mypanel.start",
         "title": "start panel"

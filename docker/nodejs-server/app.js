@@ -36,34 +36,100 @@ router.get("/pat", (req, res) => {
   return res.send("ok");
 });
 
-router.put("/staging", (req, res) => {
-  setTimeout(() => {
-    try {
-      const stagingDirectoryPath = req.body.stagingDirectoryPath;
-      const zipFileName = req.body.zipFileName;
-      console.log("Before admzip" + stagingDirectoryPath + "/" + zipFileName);
-      const file = new AdmZip(stagingDirectoryPath + "/" + zipFileName);
-      console.log("After ADM zip");
-      file.extractAllTo(stagingDirectoryPath);
-      const timestamp = Date.now();
-      var newFileName = zipFileName;
-      var arr = newFileName.split(".");
-      newFileName = arr[0] + timestamp.toString() + "." + arr[1];
-      fs.rename(
-        stagingDirectoryPath + "/" + zipFileName,
-        stagingDirectoryPath + "/" + newFileName,
-        function (err) {
-          if (err) {
-            console.log("ERROR: " + err);
-          }
+router.put("/delete/zips", async (req, res) => {
+  // setTimeout(() => {
+  //   try {
+  //     const DIR = req.body.stagingDirectoryPath;
+  //     fs.readdir(DIR, (error, filesInDirectory) => {
+  //       if (error) throw error
+  //       for (let file of filesInDirectory) {
+  //         if (file.endsWith("zip")) {
+  //           fs.unlinkSync(DIR + file);
+  //           console.log("Removed: " + file);
+  //         }
+
+  //       }
+  //     })
+  //     res.send("deleted existing zips succesfully");
+  //   } catch (error) {
+  //     console.log(error.message);
+  //     res.send("deleting existing zips failed");
+  //   }
+  // }, 2000);
+
+  try {
+    const DIR = req.body.stagingDirectoryPath;
+    fs.readdir(DIR, (error, filesInDirectory) => {
+      if (error) throw error
+      for (let file of filesInDirectory) {
+        if (file.endsWith("zip")) {
+          fs.unlinkSync(DIR + file);
+          console.log("Removed: " + file);
         }
-      );
-      res.send("Renamed zip to " + newFileName);
-    } catch (error) {
-      console.log(error.message);
-      res.send("unzipping failed");
-    }
-  }, 2000);
+
+      }
+    })
+    res.send("deleted existing zips succesfully");
+  } catch (error) {
+    console.log(error.message);
+    res.send("deleting existing zips failed");
+  }
+});
+
+router.put("/staging", async (req, res) => {
+  // setTimeout(() => {
+  //   try {
+  //     const stagingDirectoryPath = req.body.stagingDirectoryPath;
+  //     const zipFileName = req.body.zipFileName;
+  //     console.log("Before admzip" + stagingDirectoryPath + "/" + zipFileName);
+  //     const file = new AdmZip(stagingDirectoryPath + "/" + zipFileName);
+  //     console.log("After ADM zip");
+  //     file.extractAllTo(stagingDirectoryPath);
+  //     const timestamp = Date.now();
+  //     var newFileName = zipFileName;
+  //     var arr = newFileName.split(".");
+  //     newFileName = arr[0] + timestamp.toString() + "." + arr[1];
+  //     fs.rename(
+  //       stagingDirectoryPath + "/" + zipFileName,
+  //       stagingDirectoryPath + "/" + newFileName,
+  //       function (err) {
+  //         if (err) {
+  //           console.log("ERROR: " + err);
+  //         }
+  //       }
+  //     );
+  //     res.send("Renamed zip to " + newFileName);
+  //   } catch (error) {
+  //     console.log(error.message);
+  //     res.send("unzipping failed");
+  //   }
+  // }, 2000);
+
+  try {
+    const stagingDirectoryPath = req.body.stagingDirectoryPath;
+    const zipFileName = req.body.zipFileName;
+    console.log("Before admzip" + stagingDirectoryPath + "/" + zipFileName);
+    const file = new AdmZip(stagingDirectoryPath + "/" + zipFileName);
+    console.log("After ADM zip");
+    file.extractAllTo(stagingDirectoryPath);
+    const timestamp = Date.now();
+    var newFileName = zipFileName;
+    var arr = newFileName.split(".");
+    newFileName = arr[0] + timestamp.toString() + "." + arr[1];
+    fs.rename(
+      stagingDirectoryPath + "/" + zipFileName,
+      stagingDirectoryPath + "/" + newFileName,
+      function (err) {
+        if (err) {
+          console.log("ERROR: " + err);
+        }
+      }
+    );
+    res.send("Renamed zip to " + newFileName);
+  } catch (error) {
+    console.log(error.message);
+    res.send("unzipping failed");
+  }
 });
 
 router.post("/code-server/start", (req, res) => {
