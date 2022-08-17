@@ -36,26 +36,44 @@ router.get("/pat", (req, res) => {
   return res.send("ok");
 });
 
-router.put("/delete/zips", (req, res) => {
-  setTimeout(() => {
-    try {
-      const DIR = req.body.stagingDirectoryPath;
-      fs.readdir(DIR, (error, filesInDirectory) => {
-        if (error) throw error
-        for (let file of filesInDirectory) {
-          if (file.endsWith("zip")) {
-            fs.unlinkSync(DIR + file);
-            console.log("Removed: " + file);
-          }
+router.put("/delete/zips", async (req, res) => {
+  // setTimeout(() => {
+  //   try {
+  //     const DIR = req.body.stagingDirectoryPath;
+  //     fs.readdir(DIR, (error, filesInDirectory) => {
+  //       if (error) throw error
+  //       for (let file of filesInDirectory) {
+  //         if (file.endsWith("zip")) {
+  //           fs.unlinkSync(DIR + file);
+  //           console.log("Removed: " + file);
+  //         }
 
+  //       }
+  //     })
+  //     res.send("deleted existing zips succesfully");
+  //   } catch (error) {
+  //     console.log(error.message);
+  //     res.send("deleting existing zips failed");
+  //   }
+  // }, 2000);
+
+  try {
+    const DIR = req.body.stagingDirectoryPath;
+    fs.readdir(DIR, (error, filesInDirectory) => {
+      if (error) throw error
+      for (let file of filesInDirectory) {
+        if (file.endsWith("zip")) {
+          fs.unlinkSync(DIR + file);
+          console.log("Removed: " + file);
         }
-      })
-      res.send("deleted existing zips succesfully");
-    } catch (error) {
-      console.log(error.message);
-      res.send("deleting existing zips failed");
-    }
-  }, 2000);
+
+      }
+    })
+    res.send("deleted existing zips succesfully");
+  } catch (error) {
+    console.log(error.message);
+    res.send("deleting existing zips failed");
+  }
 });
 
 router.put("/staging", (req, res) => {
