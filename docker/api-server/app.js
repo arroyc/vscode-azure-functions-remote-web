@@ -22,7 +22,7 @@ const environmentName = "limelight-container-app-env";
 const storageName = "limelightfilestorage";
 const shareName = "limelight";
 const srcBlob = "funcapppy.zip";
-const dirName = "Staging";
+const dirName = "Staging/t-tomabraham";
 const { default: axios } = require("axios");
 var srcCopyURL =
   "https://billwan9c66.blob.core.windows.net/scm-releases/funcapppy.zip?sp=r&st=2022-08-08T23:24:47Z&se=2022-11-15T08:24:47Z&spr=https&sv=2021-06-08&sr=b&sig=FSlZIKb5QA0lGTz75mRzHKw7TWFGJSC2u60sXg37zb4%3D";
@@ -171,7 +171,7 @@ router.post("/session/start", async (req, res) => {
     const hostname = workerContainer.configuration.ingress.fqdn;
     console.log(`Hostname: ${hostname} at ${new Date().toISOString()}`);
     const requestBody = {
-      stagingDirectoryPath: "/functionapp/Staging/",
+      stagingDirectoryPath: "/functionapp/Staging/t-tomabraham/",
     };
     await axios.put(
       `https://${hostname}:443/limelight/delete/zips`,
@@ -183,7 +183,7 @@ router.post("/session/start", async (req, res) => {
     await fileManager.syncCode();
 
     const reqBody = {
-      stagingDirectoryPath: "/functionapp/Staging",
+      stagingDirectoryPath: "/functionapp/Staging/t-tomabraham",
       zipFileName: "funcapppy.zip",
     };
     // Call staging endpoint here
