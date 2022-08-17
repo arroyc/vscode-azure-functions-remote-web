@@ -166,17 +166,18 @@ router.post("/session/start", async (req, res) => {
         containerAppName,
         containerAppEnvelope
       );
-    
+
     // call delete all existing zips endpoint
     const hostname = workerContainer.configuration.ingress.fqdn;
     console.log(`Hostname: ${hostname} at ${new Date().toISOString()}`);
     const requestBody = {
       stagingDirectoryPath: "/functionapp/Staging/",
     };
-    await axios.put(`https://${hostname}:443/limelight/delete/zips`, requestBody);
-    console.log(
-      `All existing zips have been deleted`
+    await axios.put(
+      `https://${hostname}:443/limelight/delete/zips`,
+      requestBody
     );
+    console.log(`All existing zips have been deleted`);
 
     // call file sync method
     await fileManager.syncCode();
