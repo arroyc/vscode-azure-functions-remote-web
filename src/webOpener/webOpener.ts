@@ -342,17 +342,8 @@ export default async function doRoute(
       tooltip: `Remote Azure Function CI: "hello"`,
       onDidChange: () => ({ dispose: () => undefined }),
     },
-    // commands: [...(route.workbenchOptions?.commands ?? []),
-    //     {
-    //         id: 'azureml-remote.browser.checkForUpdates',
-    //         handler: (doUpdate) => manager.checkForUpdates({ doUpdate })
-    //     }
-    // ],
     remoteAuthority: loadUri.authority,
   };
-  // Serve to launcher
-
-  // Update Url
 
   route!.onDidCreateWorkbench!.runCommands = [
     {
