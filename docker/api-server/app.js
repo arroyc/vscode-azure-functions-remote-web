@@ -207,6 +207,7 @@ router.post("/session/start", async (req, res) => {
       data: workerContainer,
     });
   } catch (e) {
+    console.log("ERROR API SERVER: " + e);
     res.status(500).json({
       status: false,
       error: e.message,
