@@ -36,7 +36,7 @@ router.get("/pat", (req, res) => {
   return res.send("ok");
 });
 
-router.put("/delete/zips", async (req, res) => {
+router.put("/delete/zips", (req, res) => {
   setTimeout(() => {
     try {
       const DIR = req.body.stagingDirectoryPath;
