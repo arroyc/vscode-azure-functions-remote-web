@@ -73,7 +73,7 @@ router.put("/delete/zips", async (req, res) => {
     });
   } catch (error) {
     // TODO: check error type and handle differently
-    console.log(error.message);
+    console.log("Failed to delete existing zips: " + error.message);
     res.send("deleting existing zips failed");
   }
 });
