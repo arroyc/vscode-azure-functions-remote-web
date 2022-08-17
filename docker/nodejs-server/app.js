@@ -36,6 +36,26 @@ router.get("/pat", (req, res) => {
   return res.send("ok");
 });
 
+router.put("/delete/zips", async (req, res) => {
+  try {
+    const DIR = req.body.stagingDirectoryPath;
+    fs.readdir(DIR, (error, filesInDirectory) => {
+      if (error) throw error
+      for (let file of filesInDirectory) {
+        if (file.endsWith("zip")) {
+          fs.unlinkSync(DIR + file);
+          console.log("Removed: " + file);
+        }
+
+      }
+    })
+    res.send("deleted existing zips succesfully");
+  } catch (error) {
+    console.log(error.message);
+    res.send("deleting existing zips failed");
+  }
+});
+
 router.put("/staging", (req, res) => {
   setTimeout(() => {
     try {
