@@ -57,23 +57,20 @@ router.put("/delete/zips", async (req, res) => {
   //   }
   // }, 2000);
 
+  const fsPromises = fs.promises;
+  const DIR = req.body.stagingDirectoryPath;
   try {
-    const DIR = req.body.stagingDirectoryPath;
-    fs.readdir(DIR, (error, filesInDirectory) => {
-      if (error) {
-        throw error;
+    const filesInDirectory = await fsPromises.readdir(DIR);
+    for (let file of filesInDirectory) {
+      if (file.endsWith("zip")) {
+        fs.unlinkSync(DIR + file);
+        console.log("Removed: " + file);
       }
-      for (let file of filesInDirectory) {
-        if (file.endsWith("zip")) {
-          fs.unlinkSync(DIR + file);
-          console.log("Removed: " + file);
-        }
-      }
-      res.send("deleted existing zips successfully");
-    });
+
+    }
+    res.send("Existing zips deleted");
   } catch (error) {
-    // TODO: check error type and handle differently
-    console.log("Failed to delete existing zips: " + error.message);
+    console.log("ERROR: " + error);
     res.send("deleting existing zips failed");
   }
 });
