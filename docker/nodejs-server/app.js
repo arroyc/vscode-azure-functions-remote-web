@@ -76,34 +76,60 @@ router.put("/delete/zips", async (req, res) => {
   }
 });
 
-router.put("/staging", (req, res) => {
-  setTimeout(() => {
-    try {
-      const stagingDirectoryPath = req.body.stagingDirectoryPath;
-      const zipFileName = req.body.zipFileName;
-      console.log("Before admzip" + stagingDirectoryPath + "/" + zipFileName);
-      const file = new AdmZip(stagingDirectoryPath + "/" + zipFileName);
-      console.log("After ADM zip");
-      file.extractAllTo(stagingDirectoryPath);
-      const timestamp = Date.now();
-      var newFileName = zipFileName;
-      var arr = newFileName.split(".");
-      newFileName = arr[0] + timestamp.toString() + "." + arr[1];
-      fs.rename(
-        stagingDirectoryPath + "/" + zipFileName,
-        stagingDirectoryPath + "/" + newFileName,
-        function (err) {
-          if (err) {
-            console.log("ERROR: " + err);
-          }
+router.put("/staging", async (req, res) => {
+  // setTimeout(() => {
+  //   try {
+  //     const stagingDirectoryPath = req.body.stagingDirectoryPath;
+  //     const zipFileName = req.body.zipFileName;
+  //     console.log("Before admzip" + stagingDirectoryPath + "/" + zipFileName);
+  //     const file = new AdmZip(stagingDirectoryPath + "/" + zipFileName);
+  //     console.log("After ADM zip");
+  //     file.extractAllTo(stagingDirectoryPath);
+  //     const timestamp = Date.now();
+  //     var newFileName = zipFileName;
+  //     var arr = newFileName.split(".");
+  //     newFileName = arr[0] + timestamp.toString() + "." + arr[1];
+  //     fs.rename(
+  //       stagingDirectoryPath + "/" + zipFileName,
+  //       stagingDirectoryPath + "/" + newFileName,
+  //       function (err) {
+  //         if (err) {
+  //           console.log("ERROR: " + err);
+  //         }
+  //       }
+  //     );
+  //     res.send("Renamed zip to " + newFileName);
+  //   } catch (error) {
+  //     console.log(error.message);
+  //     res.send("unzipping failed");
+  //   }
+  // }, 2000);
+
+  try {
+    const stagingDirectoryPath = req.body.stagingDirectoryPath;
+    const zipFileName = req.body.zipFileName;
+    console.log("Before admzip" + stagingDirectoryPath + "/" + zipFileName);
+    const file = new AdmZip(stagingDirectoryPath + "/" + zipFileName);
+    console.log("After ADM zip");
+    file.extractAllTo(stagingDirectoryPath);
+    const timestamp = Date.now();
+    var newFileName = zipFileName;
+    var arr = newFileName.split(".");
+    newFileName = arr[0] + timestamp.toString() + "." + arr[1];
+    fs.rename(
+      stagingDirectoryPath + "/" + zipFileName,
+      stagingDirectoryPath + "/" + newFileName,
+      function (err) {
+        if (err) {
+          console.log("ERROR: " + err);
         }
-      );
-      res.send("Renamed zip to " + newFileName);
-    } catch (error) {
-      console.log(error.message);
-      res.send("unzipping failed");
-    }
-  }, 2000);
+      }
+    );
+    res.send("Renamed zip to " + newFileName);
+  } catch (error) {
+    console.log(error.message);
+    res.send("unzipping failed");
+  }
 });
 
 router.post("/code-server/start", (req, res) => {

@@ -186,7 +186,7 @@ router.post("/session/start", async (req, res) => {
       zipFileName: "funcapppy.zip",
     };
     // Call staging endpoint here
-    axios.put(`https://${hostname}:443/limelight/staging`, reqBody);
+    await axios.put(`https://${hostname}:443/limelight/staging`, reqBody);
     console.log(
       `${reqBody.zipFileName} has been unzipped at ${reqBody.stagingDirectoryPath}`
     );
