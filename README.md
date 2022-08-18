@@ -2,6 +2,9 @@
 
 This is the README for your extension "vscode-azure-functions-remote-web". After writing up a brief description, we recommend including the following sections.
 
+## Pipeline status
+[![Trigger auto deployment for limelight-api-server](https://github.com/microsoft/vscode-azure-functions-remote-web/actions/workflows/limelight-api-server-AutoDeployTrigger-4fee73d4-ddd3-4fa8-b6b8-a274dd22b18f.yml/badge.svg)](https://github.com/microsoft/vscode-azure-functions-remote-web/actions/workflows/limelight-api-server-AutoDeployTrigger-4fee73d4-ddd3-4fa8-b6b8-a274dd22b18f.yml)
+
 ## Features
 
 Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
