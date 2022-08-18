@@ -118,16 +118,19 @@ router.post("/code-server/start", (req, res) => {
     `yes | code-server --accept-server-license-terms --verbose serve --tunnel-id ${tunnelName} --host-token ${hostToken} --tunnel-name ${tunnelName} --cluster ${cluster} --port 8000`,
     { cwd: "/root", shell: true, detached: true }
   );
-  let client_url = undefined;
-
+  let clientUrl = undefined;
+  let returned = false;
   ls.stdout.on(`data`, (data) => {
     console.log(Buffer.from(data).toString());
     // console.log(new Buffer(data).toString('ascii'))
     // return res.send(data)
     const url_Ind = data.indexOf("https");
     if (url_Ind >= 0) {
-      client_url = data.toString().substring(url_Ind);
-      res.send("code server started");
+      clientUrl = data.toString().substring(url_Ind);
+      if (!returned) {
+        returned = true;
+        res.send("code server started");
+      }
     }
   });
 
@@ -135,19 +138,28 @@ router.post("/code-server/start", (req, res) => {
     console.error(`stderr: ${data}`);
     const url_Ind = data.indexOf("https");
     if (url_Ind >= 0) {
-      client_url = data.toString().substring(url_Ind);
-      res.send("code server started");
+      clientUrl = data.toString().substring(url_Ind);
+      if (!returned) {
+        returned = true;
+        res.send("code server started");
+      }
     }
   });
 
   ls.on("close", (code) => {
     console.log(`child process exited with code ${code}`);
     // console.log(dataBuffer.toString())
-    res.status(500).send(`child process exited with code ${code}`);
+    if (!returned) {
+      returned = true;
+      res.status(500).send(`child process exited with code ${code}`);
+    }
   });
 
   setTimeout(() => {
-    return res.status(500).send(`Starting code server times out`);
+    if (!returned) {
+      returned = true;
+      return res.status(500).send(`Starting code server times out`);
+    }
   }, 150000);
 });
 
