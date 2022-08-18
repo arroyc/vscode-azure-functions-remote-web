@@ -127,10 +127,6 @@ router.post("/code-server/start", (req, res) => {
     const url_Ind = data.indexOf("https");
     if (url_Ind >= 0) {
       clientUrl = data.toString().substring(url_Ind);
-      if (!returned) {
-        returned = true;
-        res.send("code server started");
-      }
     }
   });
 
@@ -139,26 +135,31 @@ router.post("/code-server/start", (req, res) => {
     const url_Ind = data.indexOf("https");
     if (url_Ind >= 0) {
       clientUrl = data.toString().substring(url_Ind);
-      if (!returned) {
-        returned = true;
-        res.send("code server started");
-      }
     }
+    // const url_Ind = data.indexOf("https");
+    // if (url_Ind >= 0) {
+    //   clientUrl = data.toString().substring(url_Ind);
+    //   if (!returned) {
+    //     returned = true;
+    //     res.send("code server started");
+    //   }
+    // }
   });
 
   ls.on("close", (code) => {
     console.log(`child process exited with code ${code}`);
     // console.log(dataBuffer.toString())
-    if (!returned) {
-      returned = true;
-      res.status(500).send(`child process exited with code ${code}`);
-    }
+    // if (!returned) {
+    //   returned = true;
+    //   res.status(500).send(`child process exited with code ${code}`);
+    // }
   });
 
   setTimeout(() => {
-    if (!returned) {
-      returned = true;
-      return res.status(500).send(`Starting code server times out`);
+    if (clientUrl) {
+      res.status(200).send("code server started");
+    } else {
+      res.status(500).send("code server failed");
     }
   }, 150000);
 });
