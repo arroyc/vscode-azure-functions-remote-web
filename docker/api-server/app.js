@@ -187,24 +187,30 @@ router.post("/session/start", async (req, res) => {
       zipFileName: "funcapppy.zip",
     };
     // Call staging endpoint here
-    await axios.put(`https://${hostname}:443/limelight/staging`, reqBody, {
-      timeout: 50000,
-    });
-    console.log(
-      `${reqBody.zipFileName} has been unzipped at ${reqBody.stagingDirectoryPath}`
-    );
+    axios
+      .put(`https://${hostname}:443/limelight/staging`, reqBody)
+      .then((data) => {
+        console.log("Cx function app code synced...");
+        console.log(
+          `${reqBody.zipFileName} has been unzipped at ${reqBody.stagingDirectoryPath}`
+        );
+      })
+      .catch((error) => {
+        console.log("Failed to sync cx function app code..");
+        console.error(error);
+      });
 
     // fileManager
     //   .syncCode()
-    //   .then((data) => {
-    //     console.log("Cx function app code synced...");
-    //   })
-    //   .catch((error) => {
-    //     console.log("Failed to sync cx function app code..");
-    //     console.error(error);
-    //   });
+    // .then((data) => {
+    //   console.log("Cx function app code synced...");
+    // })
+    // .catch((error) => {
+    //   console.log("Failed to sync cx function app code..");
+    //   console.error(error);
+    // });
 
-    res.json({
+    return res.json({
       status: true,
       data: workerContainer,
     });
