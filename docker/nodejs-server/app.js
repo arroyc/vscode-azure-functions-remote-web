@@ -119,7 +119,6 @@ router.post("/code-server/start", (req, res) => {
     { cwd: "/root", shell: true, detached: true }
   );
   let clientUrl = undefined;
-  let returned = false;
   ls.stdout.on(`data`, (data) => {
     console.log(Buffer.from(data).toString());
     // console.log(new Buffer(data).toString('ascii'))
@@ -161,7 +160,7 @@ router.post("/code-server/start", (req, res) => {
     } else {
       res.status(500).send("code server failed");
     }
-  }, 150000);
+  }, 15000);
 });
 
 app.use("/limelight", router);
