@@ -185,12 +185,13 @@ router.post("/session/start", async (req, res) => {
 router.post("/file/sync", async (req, res) => {
   const requestId = uuid.v4().toString();
   try {
-    // call delete all existing zips endpoint
     const hostname = req.body.hostname;
     const username = req.body.username;
     console.log(
       `${requestId} Starting sync file at hostname: ${hostname} at ${new Date().toISOString()}`
     );
+
+    // call delete all existing zips endpoint (delete preexisting zips)
     const requestBody = {
       stagingDirectoryPath: `/functionapp/Staging/${username}/`,
     };
@@ -198,8 +199,6 @@ router.post("/file/sync", async (req, res) => {
       `https://${hostname}:443/limelight/delete/zips`,
       requestBody
     );
-    console.log(`${requestId} All existing zips have been deleted`);
-
     // call file sync method
     await fileManager.syncCode(`Staging/${username}`);
 
@@ -212,6 +211,12 @@ router.post("/file/sync", async (req, res) => {
     console.log(
       `${requestId} Done sync file at hostname: ${hostname} at ${new Date().toISOString()}`
     );
+    // call delete all existing zips endpoint (delete newly copied zip file)
+    await axios.put(
+      `https://${hostname}:443/limelight/delete/zips`,
+      requestBody
+    );
+    console.log(`${requestId} All existing zips have been deleted`);
     res.json({
       status: true,
       data: `${requestId} function app file synced`,
