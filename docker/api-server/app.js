@@ -53,6 +53,7 @@ let fileManager;
   accountKey = await secretManager.getSecret("ll-sa-keyy");
   registryP = await secretManager.getSecret("ll-registry-pword");
   connStr = await secretManager.getSecret("ll-conn-str");
+  //TODO: srcBlobUrl move to key vault
 
   // Init objects requiring secrets
   fileManager = new FileManager(accountKey, registryP, connStr);
