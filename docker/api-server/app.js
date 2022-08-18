@@ -191,6 +191,16 @@ router.post("/file/sync", async (req, res) => {
       `${requestId} Starting sync file at hostname: ${hostname} at ${new Date().toISOString()}`
     );
 
+    // function app version publishing timestamp
+    // deploy-timestamp-1-function app version publishing
+    // deploy-timestamp-2
+    // deploy-timestamp-3
+
+    // first check if current deployment zip in scm-release updated time is greater than latest deploy version timestamp
+    // if later, create a new deploy folder with latest deploy ts and copy the zip over
+    // if not, do nothing
+    // then unzip the zip from deploy folder into Staging folder
+
     // call delete all existing zips endpoint (delete preexisting zips)
     const requestBody = {
       stagingDirectoryPath: `/functionapp/Staging/${username}/`,
@@ -212,10 +222,10 @@ router.post("/file/sync", async (req, res) => {
       `${requestId} Done sync file at hostname: ${hostname} at ${new Date().toISOString()}`
     );
     // call delete all existing zips endpoint (delete newly copied zip file)
-    await axios.put(
-      `https://${hostname}:443/limelight/delete/zips`,
-      requestBody
-    );
+    // await axios.put(
+    //   `https://${hostname}:443/limelight/delete/zips`,
+    //   requestBody
+    // );
     console.log(`${requestId} All existing zips have been deleted`);
     res.json({
       status: true,
