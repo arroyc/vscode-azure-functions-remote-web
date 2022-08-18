@@ -106,7 +106,7 @@ export default async function doRoute(
     // path: '/root/.npm'
   });
   // Get aad token
-  var azureAuthManager = new AzureAuthManager(extra.microsoftAuthentication);
+  const azureAuthManager = new AzureAuthManager(extra.microsoftAuthentication);
   const session = await azureAuthManager.getAzureAuthSession(BASIS_SCOPES);
   console.log("Getting AAD session...");
   console.log(session);
@@ -124,12 +124,12 @@ export default async function doRoute(
   // console.log(`test token: ${test_accToken}`);
 
   console.log("Checking if its a new or existing app..");
-  var url =
+  const url =
     "https://management.azure.com//subscriptions/e323ee1a-020a-4faa-8df9-23dbc171a8d2/resourceGroups/t-tomabraham-rg/providers/Microsoft.Web/sites/new-app-to?api-version=2021-02-01";
 
   // checking to see if func app exists
   try {
-    var { data } = await axios.get(url, {
+    const { data } = await axios.get(url, {
       headers: {
         Authorization: "Bearer " + azure_accessToken,
       },
@@ -145,9 +145,9 @@ export default async function doRoute(
 
   // only get connection string if func app exists (meaning it is NOT a new_func_app)
   if (new_func_app === false) {
-    var url =
+    const url =
       "https://management.azure.com/subscriptions/e323ee1a-020a-4faa-8df9-23dbc171a8d2/resourceGroups/t-tomabraham-rg/providers/Microsoft.Web/sites/new-app-tom/config/appsettings/list?api-version=2021-02-01";
-    var { data } = await axios.post(url, "", {
+    const { data } = await axios.post(url, "", {
       headers: {
         Authorization: "Bearer " + azure_accessToken,
       },
