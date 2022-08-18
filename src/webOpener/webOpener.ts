@@ -78,8 +78,6 @@ export interface IRouterWorkbench {
   };
 }
 
-
-
 export default async function doRoute(
   route: IRouteResult,
   extra: {
@@ -248,9 +246,12 @@ export default async function doRoute(
           hostToken: tunnel.token,
           tunnelName: tunnel.name,
           cluster: tunnel.clusterId,
+        },
+        {
+          timeout: 8000,
         }
       );
-      console.log(data);
+      console.log("Started code server in limelight: " + data);
       setInterval(async () => {
         // const status = await axios.get('http://localhost:443/ping');
         const status = await axios.get(`https://${hostname}:443/limelight/pat`);

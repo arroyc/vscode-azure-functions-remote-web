@@ -55,14 +55,13 @@ class FileManager {
   async syncCode() {
     try {
       await this.createDirectory();
-      await this.copyZip();
     } catch (error) {
       console.log(error);
       console.log(
         this.dirName +
           " Folder already exists, overwriting zip to match latest deployment"
       );
-      await this.deleteZip();
+    } finally {
       await this.copyZip();
     }
   }

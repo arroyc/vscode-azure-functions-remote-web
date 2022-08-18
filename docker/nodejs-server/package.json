@@ -17,6 +17,7 @@
         "@azure/arm-app": "^1.0.0-alpha.20220330.1",
         "@azure/identity": "^2.1.0",
         "adm-zip": "^0.5.9",
+        "await-spawn": "^4.0.2",
         "cors": "^2.8.5",
         "express": "^4.16.4",
         "fs": "^0.0.1-security",

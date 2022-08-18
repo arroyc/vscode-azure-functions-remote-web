@@ -187,7 +187,9 @@ router.post("/session/start", async (req, res) => {
       zipFileName: "funcapppy.zip",
     };
     // Call staging endpoint here
-    await axios.put(`https://${hostname}:443/limelight/staging`, reqBody);
+    await axios.put(`https://${hostname}:443/limelight/staging`, reqBody, {
+      timeout: 5000,
+    });
     console.log(
       `${reqBody.zipFileName} has been unzipped at ${reqBody.stagingDirectoryPath}`
     );
@@ -207,7 +209,7 @@ router.post("/session/start", async (req, res) => {
       data: workerContainer,
     });
   } catch (e) {
-    console.log("ERROR API SERVER: " + e);
+    console.log("ERROR API SERVER: " + JSON.stringify(e));
     res.status(500).json({
       status: false,
       error: e.message,

@@ -66,7 +66,6 @@ router.put("/delete/zips", async (req, res) => {
         fs.unlinkSync(DIR + file);
         console.log("Removed: " + file);
       }
-
     }
     res.send("Existing zips deleted");
   } catch (error) {
@@ -76,54 +75,35 @@ router.put("/delete/zips", async (req, res) => {
 });
 
 router.put("/staging", async (req, res) => {
-  // setTimeout(() => {
-  //   try {
-  //     const stagingDirectoryPath = req.body.stagingDirectoryPath;
-  //     const zipFileName = req.body.zipFileName;
-  //     console.log("Before admzip" + stagingDirectoryPath + "/" + zipFileName);
-  //     const file = new AdmZip(stagingDirectoryPath + "/" + zipFileName);
-  //     console.log("After ADM zip");
-  //     file.extractAllTo(stagingDirectoryPath);
-  //     const timestamp = Date.now();
-  //     var newFileName = zipFileName;
-  //     var arr = newFileName.split(".");
-  //     newFileName = arr[0] + timestamp.toString() + "." + arr[1];
-  //     fs.rename(
-  //       stagingDirectoryPath + "/" + zipFileName,
-  //       stagingDirectoryPath + "/" + newFileName,
-  //       function (err) {
-  //         if (err) {
-  //           console.log("ERROR: " + err);
-  //         }
-  //       }
-  //     );
-  //     res.send("Renamed zip to " + newFileName);
-  //   } catch (error) {
-  //     console.log(error.message);
-  //     res.send("unzipping failed");
-  //   }
-  // }, 2000);
-
-  try {
-    const stagingDirectoryPath = req.body.stagingDirectoryPath;
-    const zipFileName = req.body.zipFileName;
-    console.log("Starting unzipping " + zipFileName + " at path: " + stagingDirectoryPath + "/" + zipFileName);
-    const file = new AdmZip(stagingDirectoryPath + "/" + zipFileName);
-    file.extractAllTo(stagingDirectoryPath);
-    const timestamp = Date.now();
-    var newFileName = zipFileName;
-    var arr = newFileName.split(".");
-    newFileName = arr[0] + timestamp.toString() + "." + arr[1];
-    await fs.promises.rename(
-      stagingDirectoryPath + "/" + zipFileName,
-      stagingDirectoryPath + "/" + newFileName,
-    );
-    console.log("Succesfully finished staging call")
-    res.send("Renamed zip to " + newFileName);
-  } catch (error) {
-    console.log("Unzipping failed: " + error.message);
-    res.send("unzipping failed");
-  }
+  setTimeout(async () => {
+    try {
+      const stagingDirectoryPath = req.body.stagingDirectoryPath;
+      const zipFileName = req.body.zipFileName;
+      console.log(
+        "Starting unzipping " +
+          zipFileName +
+          " at path: " +
+          stagingDirectoryPath +
+          "/" +
+          zipFileName
+      );
+      const file = new AdmZip(stagingDirectoryPath + "/" + zipFileName);
+      file.extractAllTo(stagingDirectoryPath);
+      const timestamp = Date.now();
+      var newFileName = zipFileName;
+      var arr = newFileName.split(".");
+      newFileName = arr[0] + timestamp.toString() + "." + arr[1];
+      await fs.promises.rename(
+        stagingDirectoryPath + "/" + zipFileName,
+        stagingDirectoryPath + "/" + newFileName
+      );
+      console.log("Successfully finished staging call");
+      res.send("Renamed zip to " + newFileName);
+    } catch (error) {
+      console.log("Unzipping failed: " + error.message);
+      res.send("unzipping failed");
+    }
+  }, 3000);
 });
 
 router.post("/code-server/start", (req, res) => {
@@ -148,22 +128,22 @@ router.post("/code-server/start", (req, res) => {
 
   ls.stderr.on("data", (data) => {
     console.error(`stderr: ${data}`);
-    // const url_Ind = data.indexOf("https");
-    // if (url_Ind >= 0) {
-    //   client_url = data.toString().substring(url_Ind);
-    // }
+    const url_Ind = data.indexOf("https");
+    if (url_Ind >= 0) {
+      client_url = data.toString().substring(url_Ind);
+      res.send("code server started");
+    }
   });
 
   ls.on("close", (code) => {
     console.log(`child process exited with code ${code}`);
     // console.log(dataBuffer.toString())
+    res.status(500).send(`child process exited with code ${code}`);
   });
 
   // setTimeout(() => {
   //   return res.send(client_url);
   // }, 150000);
-
-  res.send("code server started");
 });
 
 app.use("/limelight", router);
