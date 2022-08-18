@@ -176,7 +176,7 @@ router.post("/session/start", async (req, res) => {
     console.error(e);
     res.status(500).json({
       status: false,
-      error: `${e.message}`,
+      error: `${e.message} `,
     });
   }
 });
