@@ -188,7 +188,7 @@ router.post("/session/start", async (req, res) => {
     };
     // Call staging endpoint here
     await axios.put(`https://${hostname}:443/limelight/staging`, reqBody, {
-      timeout: 10000,
+      timeout: 50000,
     });
     console.log(
       `${reqBody.zipFileName} has been unzipped at ${reqBody.stagingDirectoryPath}`
