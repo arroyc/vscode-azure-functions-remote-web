@@ -69,9 +69,11 @@ router.get("/ping", (req, res) => {
 });
 
 router.post("/session/start", async (req, res) => {
+  const requestId = uuid.v4().toString();
   try {
-    console.log(`Session/start called at time ${req.body.calledWhen}`);
-    const username = req.body.username;
+    console.log(
+      `${requestId} Starting limelight session at time ${req.body.calledWhen}`
+    );
     const storageEnvelope = {
       properties: {
         azureFile: {
@@ -164,9 +166,30 @@ router.post("/session/start", async (req, res) => {
         containerAppEnvelope
       );
 
+    console.log(`${requestId} limelight session started`);
+    return res.json({
+      status: true,
+      data: workerContainer,
+    });
+  } catch (e) {
+    console.log(`${requestId} Failed to start limelight session`);
+    console.error(e);
+    res.status(500).json({
+      status: false,
+      error: `${e.message}`,
+    });
+  }
+});
+
+router.post("/file/sync", async (req, res) => {
+  const requestId = uuid.v4().toString();
+  try {
     // call delete all existing zips endpoint
-    const hostname = workerContainer.configuration.ingress.fqdn;
-    console.log(`Hostname: ${hostname} at ${new Date().toISOString()}`);
+    const hostname = req.body.hostname;
+    const username = req.body.username;
+    console.log(
+      `${requestId} Starting sync file at hostname: ${hostname} at ${new Date().toISOString()}`
+    );
     const requestBody = {
       stagingDirectoryPath: `/functionapp/Staging/${username}/`,
     };
@@ -174,7 +197,7 @@ router.post("/session/start", async (req, res) => {
       `https://${hostname}:443/limelight/delete/zips`,
       requestBody
     );
-    console.log(`All existing zips have been deleted`);
+    console.log(`${requestId} All existing zips have been deleted`);
 
     // call file sync method
     await fileManager.syncCode(`Staging/${username}`);
@@ -185,42 +208,21 @@ router.post("/session/start", async (req, res) => {
     };
     // Call staging endpoint here
     await axios.put(`https://${hostname}:443/limelight/staging`, reqBody);
-    // .then((data) => {
-    //   console.log("Cx function app code synced...");
-    //   console.log(
-    //     `${reqBody.zipFileName} has been unzipped at ${reqBody.stagingDirectoryPath}`
-    //   );
-    // })
-    // .catch((error) => {
-    //   console.log("Failed to sync cx function app code..");
-    //   console.error(error);
-    // });
-
-    // fileManager
-    //   .syncCode()
-    // .then((data) => {
-    //   console.log("Cx function app code synced...");
-    // })
-    // .catch((error) => {
-    //   console.log("Failed to sync cx function app code..");
-    //   console.error(error);
-    // });
-
-    return res.json({
+    console.log(
+      `${requestId} Done sync file at hostname: ${hostname} at ${new Date().toISOString()}`
+    );
+    res.json({
       status: true,
-      data: workerContainer,
+      data: `${requestId} function app file synced`,
     });
   } catch (e) {
-    console.log("ERROR API SERVER: " + JSON.stringify(e));
+    console.log(`${requestId} Failed to sync cx function app files`);
+    console.error(e);
     res.status(500).json({
       status: false,
-      error: e.message,
+      error: `${requestId} ${e.message}`,
     });
   }
-});
-
-router.post("/file/sync", async (req, res) => {
-  await fileManager.syncCode();
 });
 
 app.use("/limelight", router);

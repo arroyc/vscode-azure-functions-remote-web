@@ -210,7 +210,6 @@ export default async function doRoute(
         {
           // TODO: pass in custom container app name, if not exist, create one with the name otherwise return the info
           calledWhen: new Date().toISOString(),
-          username: workspaceOrFolderUri.authority,
         }
       );
       console.log("Limelight session is created..");
@@ -221,17 +220,23 @@ export default async function doRoute(
       } else {
         throw new Error("Hostname is empty");
       }
+
+      console.log(`Starting syncing cx function app files..`);
+      const res = await axios.post(
+        "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443/limelight/file/sync",
+        {
+          username: workspaceOrFolderUri.authority,
+          hostname,
+        }
+      );
+      console.log(`Cx function app files are synced: ${res}`);
     } catch (error) {
       console.log("Failed to create limelight session..");
       console.log(error);
-      throw new Error("Failed to initialize limelight!");
+      throw new Error("Failed to create limelight session..");
     }
 
     try {
-      // const { data } = await axios.post('http://vscoderemote.centralus.azurecontainer.io:80/utility', {
-      // const { data } = await axios.post('https://20.221.97.147:443/utility', {
-      // const { data } = await axios.post('https://project-limelight-p0.salmonfield-d8375633.centralus.azurecontainerapps.io:443/utility', {
-      // const { data } = await axios.post('http://localhost:443/utility', {
       console.log(`Starting code server at ${hostname}..`);
       const { data } = await axios.post(
         `https://${hostname}:443/limelight/code-server/start`,
