@@ -99,6 +99,7 @@ export default async function doRoute(
       ? route.workspace.folderUri
       : route.workspace!.workspaceUri;
   console.log("uri: " + workspaceOrFolderUri);
+  console.log(`Getting authority name ${workspaceOrFolderUri.authority}`);
   const loadUri = workspaceOrFolderUri.with({
     // scheme: 'http',
     authority: `appazurefunctions+${workspaceOrFolderUri.authority}`,
@@ -189,47 +190,39 @@ export default async function doRoute(
         retries: 3,
       }
     );
-
-    // try {
-    //   tunnel = await Basis.createTunnelWithPort(accessToken, 8000);
-    //   localStorage.setItem("tunnel-def", JSON.stringify(tunnel));
-    // } catch (e) {
-    //   console.log(e);
-    //   // TODO: send toast err msg to user, find inactive tunnels and prompt user whether to delete
-    //   await Basis.deleteInactiveTunnels(accessToken);
-    // }
   }
 
   // Look up container info in cache
 
   // Call container api hosted at the container app ip
+  console.log("Tunnel is found..");
   console.log(tunnel);
-  // if tunnel exists,
-  //    if active, conn
-  //    if not, kill it, create new update localstorage
-  // if tunnel not exists, create new update localstorage
   const tunnelActive = await Basis.isActive(accessToken, tunnel);
   if (!tunnelActive) {
     // If not, call api server to create and return a new container app
     localStorage.removeItem("hostname");
-    let hostname = "";
+    let hostname: string | undefined = undefined;
     try {
-      console.log("extension call session/start");
+      console.log("Starting limelight session..");
       const containerInfo = await axios.post(
-        "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443/limelight/session/start",
+        // "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443/limelight/session/start",
+        "http://localhost:443/limelight/session/start",
         {
           // TODO: pass in custom container app name, if not exist, create one with the name otherwise return the info
           calledWhen: new Date().toISOString(),
+          username: workspaceOrFolderUri.authority,
         }
       );
+      console.log("Limelight session is created..");
       console.log(containerInfo);
       hostname = containerInfo.data.data.configuration.ingress.fqdn;
-      if (hostname !== "") {
+      if (hostname) {
         localStorage.setItem("hostname", hostname);
       } else {
         throw new Error("Hostname is empty");
       }
     } catch (error) {
+      console.log("Failed to create limelight session..");
       console.log(error);
       throw new Error("Failed to initialize limelight!");
     }
@@ -239,6 +232,7 @@ export default async function doRoute(
       // const { data } = await axios.post('https://20.221.97.147:443/utility', {
       // const { data } = await axios.post('https://project-limelight-p0.salmonfield-d8375633.centralus.azurecontainerapps.io:443/utility', {
       // const { data } = await axios.post('http://localhost:443/utility', {
+      console.log(`Starting code server at ${hostname}..`);
       const { data } = await axios.post(
         `https://${hostname}:443/limelight/code-server/start`,
         {
@@ -246,12 +240,9 @@ export default async function doRoute(
           hostToken: tunnel.token,
           tunnelName: tunnel.name,
           cluster: tunnel.clusterId,
-        },
-        {
-          timeout: 8000,
         }
       );
-      console.log("Started code server in limelight: " + data);
+      console.log(`Started code server in limelight: ${data}`);
       setInterval(async () => {
         // const status = await axios.get('http://localhost:443/ping');
         const status = await axios.get(`https://${hostname}:443/limelight/pat`);
@@ -260,7 +251,7 @@ export default async function doRoute(
         //TODO: if failed, container app is gone, create new container app with same name
       }, 5000);
     } catch (error) {
-      console.log(error);
+      console.log(`Failed to start code server: ${error}`);
       //TODO: if failed, container app is gone, create new container app with same name
       localStorage.removeItem("hostname");
     }

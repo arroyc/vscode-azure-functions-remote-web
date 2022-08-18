@@ -21,11 +21,7 @@ const containerAppName = "ll" + uuid.v4().replace(/-/g, "").substring(0, 15);
 const environmentName = "limelight-container-app-env";
 const storageName = "limelightfilestorage";
 const shareName = "limelight";
-const srcBlob = "funcapppy.zip";
-const dirName = "Staging/t-tomabraham";
 const { default: axios } = require("axios");
-var srcCopyURL =
-  "https://billwan9c66.blob.core.windows.net/scm-releases/funcapppy.zip?sp=r&st=2022-08-08T23:24:47Z&se=2022-11-15T08:24:47Z&spr=https&sv=2021-06-08&sr=b&sig=FSlZIKb5QA0lGTz75mRzHKw7TWFGJSC2u60sXg37zb4%3D";
 
 // Env initialization
 const app = express();
@@ -59,7 +55,7 @@ let fileManager;
   connStr = await secretManager.getSecret("ll-conn-str");
 
   // Init objects requiring secrets
-  fileManager = new FileManager(accountKey, registryP, dirName, connStr);
+  fileManager = new FileManager(accountKey, registryP, connStr);
 })();
 
 const containerAppManager = new ContainerAppsManager(
@@ -75,6 +71,7 @@ router.get("/ping", (req, res) => {
 router.post("/session/start", async (req, res) => {
   try {
     console.log(`Session/start called at time ${req.body.calledWhen}`);
+    const username = req.body.username;
     const storageEnvelope = {
       properties: {
         azureFile: {
@@ -171,7 +168,7 @@ router.post("/session/start", async (req, res) => {
     const hostname = workerContainer.configuration.ingress.fqdn;
     console.log(`Hostname: ${hostname} at ${new Date().toISOString()}`);
     const requestBody = {
-      stagingDirectoryPath: "/functionapp/Staging/t-tomabraham/",
+      stagingDirectoryPath: `/functionapp/Staging/${username}/`,
     };
     await axios.put(
       `https://${hostname}:443/limelight/delete/zips`,
@@ -180,10 +177,10 @@ router.post("/session/start", async (req, res) => {
     console.log(`All existing zips have been deleted`);
 
     // call file sync method
-    await fileManager.syncCode();
+    await fileManager.syncCode(`Staging/${username}`);
 
     const reqBody = {
-      stagingDirectoryPath: "/functionapp/Staging/t-tomabraham",
+      stagingDirectoryPath: `/functionapp/Staging/${username}`,
       zipFileName: "funcapppy.zip",
     };
     // Call staging endpoint here

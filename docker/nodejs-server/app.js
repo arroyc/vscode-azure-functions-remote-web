@@ -124,6 +124,11 @@ router.post("/code-server/start", (req, res) => {
     console.log(Buffer.from(data).toString());
     // console.log(new Buffer(data).toString('ascii'))
     // return res.send(data)
+    const url_Ind = data.indexOf("https");
+    if (url_Ind >= 0) {
+      client_url = data.toString().substring(url_Ind);
+      res.send("code server started");
+    }
   });
 
   ls.stderr.on("data", (data) => {
@@ -141,9 +146,9 @@ router.post("/code-server/start", (req, res) => {
     res.status(500).send(`child process exited with code ${code}`);
   });
 
-  // setTimeout(() => {
-  //   return res.send(client_url);
-  // }, 150000);
+  setTimeout(() => {
+    return res.status(500).send(`Starting code server times out`);
+  }, 150000);
 });
 
 app.use("/limelight", router);

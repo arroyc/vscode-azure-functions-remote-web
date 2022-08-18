@@ -2,10 +2,9 @@ const { ShareServiceClient } = require("@azure/storage-file-share");
 const axios = require("axios");
 
 class FileManager {
-  constructor(accountKey, registryP, dirName, connStr) {
+  constructor(accountKey, registryP, connStr) {
     this.accountKey = accountKey;
     this.registryP = registryP;
-    this.dirName = dirName;
     this.shareName = "limelight";
     this.srcBlob = "funcapppy.zip";
     this.srcCopyURL =
@@ -15,35 +14,33 @@ class FileManager {
     ).getShareClient(this.shareName);
   }
 
-  async copyZip() {
+  async copyZip(dirName) {
     // Copy Zip
     const fileClient = this.shareClient
-      .getDirectoryClient(this.dirName)
+      .getDirectoryClient(dirName)
       .getFileClient(this.srcBlob);
     await fileClient.startCopyFromURL(this.srcCopyURL);
     console.log(
       `Done copying ${this.srcCopyURL} from ${this.srcBlob} to 
-      ${this.dirName} at ${new Date().toISOString()}`
+      ${dirName} at ${new Date().toISOString()}`
     );
   }
 
-  async createDirectory() {
+  async createDirectory(dirName) {
     // Create Directory
-    const directoryClient = this.shareClient.getDirectoryClient(this.dirName);
+    const directoryClient = this.shareClient.getDirectoryClient(dirName);
     await directoryClient.create();
     console.log(
-      `Create directory ${
-        this.dirName
-      } successfully at ${new Date().toISOString()}`
+      `Create directory ${dirName} successfully at ${new Date().toISOString()}`
     );
   }
 
-  async deleteZip() {
+  async deleteZip(dirName) {
     try {
       console.log(
         `Delete zip ${this.srcBlob} successfully at ${new Date().toISOString()}`
       );
-      const directoryClient = this.shareClient.getDirectoryClient(this.dirName);
+      const directoryClient = this.shareClient.getDirectoryClient(dirName);
       const fileClient = directoryClient.getFileClient(this.srcBlob);
       await fileClient.delete();
     } catch (error) {
@@ -52,17 +49,17 @@ class FileManager {
     }
   }
 
-  async syncCode() {
+  async syncCode(dirName) {
     try {
-      await this.createDirectory();
+      await this.createDirectory(dirName);
     } catch (error) {
       console.log(error);
       console.log(
-        this.dirName +
+        dirName +
           " Folder already exists, overwriting zip to match latest deployment"
       );
     } finally {
-      await this.copyZip();
+      await this.copyZip(dirName);
     }
   }
   //     finally {
