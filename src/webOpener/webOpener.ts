@@ -205,8 +205,8 @@ export default async function doRoute(
     try {
       console.log("Starting limelight session..");
       const containerInfo = await axios.post(
-        // "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443/limelight/session/start",
-        "http://localhost:443/limelight/session/start",
+        "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443/limelight/session/start",
+        // "http://localhost:443/limelight/session/start",
         {
           // TODO: pass in custom container app name, if not exist, create one with the name otherwise return the info
           calledWhen: new Date().toISOString(),
