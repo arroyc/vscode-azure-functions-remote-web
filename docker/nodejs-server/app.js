@@ -8,15 +8,22 @@ console.log("modules imported..");
 app.use(cors());
 // Constants
 const PORT = 443;
+const forceTimeout = 300000;
+const inactiveTimeout = 150000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // forced timeout
 setTimeout(() => {
-  console.log("Forced timeout");
+  // TODO: inform extension side so user can know session is timed out
+  console.log(
+    `Your limelight session has reached max timeout of ${
+      forceTimeout / 1000
+    } minutes, shutting down...`
+  );
   process.exit(0);
-}, 300000);
+}, forceTimeout);
 
 // timer
 let timer;
@@ -30,9 +37,14 @@ router.get("/pat", (req, res) => {
     clearTimeout(timer);
   }
   timer = setTimeout(() => {
-    console.log("Inactive timeout");
+    // TODO: inform extension side so user can know session is timed out
+    console.log(
+      `Your limelight session has been idle for ${
+        inactiveTimeout / 1000
+      } minutes, shutting down...`
+    );
     process.exit(0);
-  }, 150000);
+  }, inactiveTimeout);
   return res.send("ok");
 });
 

@@ -35,7 +35,6 @@ class ContainerAppsManager {
       );
     return containerAppInfo;
   }
-  
 }
 
 module.exports = ContainerAppsManager;

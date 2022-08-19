@@ -76,16 +76,16 @@ router.post("/session/start", async (req, res) => {
     );
     const containerAppName =
       "ll" + uuid.v4().replace(/-/g, "").substring(0, 15);
-    const storageEnvelope = {
-      properties: {
-        azureFile: {
-          accessMode: "ReadWrite",
-          accountKey: accountKey,
-          accountName: storageName,
-          shareName: shareName,
-        },
-      },
-    };
+    // const storageEnvelope = {
+    //   properties: {
+    //     azureFile: {
+    //       accessMode: "ReadWrite",
+    //       accountKey: accountKey,
+    //       accountName: storageName,
+    //       shareName: shareName,
+    //     },
+    //   },
+    // };
 
     const containerAppEnvelope = {
       identity: {
@@ -154,12 +154,12 @@ router.post("/session/start", async (req, res) => {
       },
     };
 
-    await containerAppManager.createOrUpdateManagedEnvStorage(
-      resourceGroupName,
-      environmentName,
-      storageName,
-      storageEnvelope
-    );
+    // await containerAppManager.createOrUpdateManagedEnvStorage(
+    //   resourceGroupName,
+    //   environmentName,
+    //   storageName,
+    //   storageEnvelope
+    // );
 
     const workerContainer =
       await containerAppManager.createOrUpdateContainerApp(
