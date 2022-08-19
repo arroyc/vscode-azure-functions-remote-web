@@ -17,7 +17,6 @@ const PORT = 443;
 // Env vars
 const subscriptionId = "edc48857-dd0b-4085-a2a9-5e7df12bd2fd";
 const resourceGroupName = "limelight";
-const containerAppName = "ll" + uuid.v4().replace(/-/g, "").substring(0, 15);
 const environmentName = "limelight-container-app-env";
 const storageName = "limelightfilestorage";
 const shareName = "limelight";
@@ -75,6 +74,8 @@ router.post("/session/start", async (req, res) => {
     console.log(
       `${requestId} Starting limelight session at time ${req.body.calledWhen}`
     );
+    const containerAppName =
+      "ll" + uuid.v4().replace(/-/g, "").substring(0, 15);
     const storageEnvelope = {
       properties: {
         azureFile: {
@@ -190,11 +191,6 @@ router.post("/file/sync", async (req, res) => {
     console.log(
       `${requestId} Starting sync file at hostname: ${hostname} at ${new Date().toISOString()}`
     );
-
-    // function app version publishing timestamp
-    // deploy-timestamp-1-function app version publishing
-    // deploy-timestamp-2
-    // deploy-timestamp-3
 
     // first check if current deployment zip in scm-release updated time is greater than latest deploy version timestamp
     // if later, create a new deploy folder with latest deploy ts and copy the zip over
