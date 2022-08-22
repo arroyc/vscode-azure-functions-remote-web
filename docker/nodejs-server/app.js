@@ -89,25 +89,26 @@ router.put("/delete/zips", async (req, res) => {
 router.put("/staging", async (req, res) => {
   setTimeout(async () => {
     try {
+      const deploymentDirectoryPath = req.body.deploymentDirectoryPath;
       const stagingDirectoryPath = req.body.stagingDirectoryPath;
       const zipFileName = req.body.zipFileName;
       console.log(
         "Starting unzipping " +
           zipFileName +
           " at path: " +
-          stagingDirectoryPath +
+          deploymentDirectoryPath +
           "/" +
           zipFileName
       );
-      const file = new AdmZip(stagingDirectoryPath + "/" + zipFileName);
+      const file = new AdmZip(deploymentDirectoryPath + "/" + zipFileName);
       file.extractAllTo(stagingDirectoryPath);
       const timestamp = Date.now();
       var newFileName = zipFileName;
       var arr = newFileName.split(".");
       newFileName = arr[0] + timestamp.toString() + "." + arr[1];
       await fs.promises.rename(
-        stagingDirectoryPath + "/" + zipFileName,
-        stagingDirectoryPath + "/" + newFileName
+        deploymentDirectoryPath + "/" + zipFileName,
+        deploymentDirectoryPath + "/" + newFileName
       );
       console.log("Successfully finished staging call");
       res.send("Renamed zip to " + newFileName);
