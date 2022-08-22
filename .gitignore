@@ -247,3 +247,4 @@ package-lock.json
 # local app.js file
 app_local.js
 docker/nodejs-server/app-local.js
+.npmrc

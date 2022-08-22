@@ -221,7 +221,7 @@ export default async function doRoute(
         throw new Error("Hostname is empty");
       }
 
-      console.log(`Starting syncing cx function app files..`);
+      console.log(`Starting syncing cx function app files at ${hostname}..`);
       const res = await axios.post(
         "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443/limelight/file/sync",
         {

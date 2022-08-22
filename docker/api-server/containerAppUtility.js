@@ -33,6 +33,8 @@ class ContainerAppsManager {
         containerAppName,
         containerAppEnvelope
       );
+
+      this.containerAppClient.managedEnvironments.get();
     return containerAppInfo;
   }
 }

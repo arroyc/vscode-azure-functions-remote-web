@@ -8,8 +8,8 @@ console.log("modules imported..");
 app.use(cors());
 // Constants
 const PORT = 443;
-const forceTimeout = 300000;
-const inactiveTimeout = 150000;
+const forceTimeout = 18000000;
+const inactiveTimeout = 900000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
