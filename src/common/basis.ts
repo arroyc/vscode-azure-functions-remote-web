@@ -243,7 +243,7 @@ export namespace Basis {
     return {
       tunnelId: tunnelInstance!.tunnelId!,
       name: tunnelInstance!.name,
-      remotePort: 8000,
+      remotePort: 31345,
       token: tunnelInstance!.accessTokens?.manage,
       clusterId: tunnelInstance!.clusterId,
     };
