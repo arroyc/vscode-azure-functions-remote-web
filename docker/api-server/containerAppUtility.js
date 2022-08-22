@@ -34,7 +34,6 @@ class ContainerAppsManager {
         containerAppEnvelope
       );
 
-      this.containerAppClient.managedEnvironments.get();
     return containerAppInfo;
   }
 }

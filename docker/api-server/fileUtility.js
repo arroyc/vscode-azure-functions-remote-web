@@ -34,6 +34,9 @@ class FileManager {
   async createDirectory(dirName) {
     // Create Directory
     const directoryClient = this.shareClient.getDirectoryClient(dirName);
+    console.log(
+      `Start creating directory ${dirName} at ${new Date().toISOString()}`
+    );
     await directoryClient.create();
     console.log(
       `Create directory ${dirName} successfully at ${new Date().toISOString()}`
@@ -43,11 +46,12 @@ class FileManager {
   async deleteZip(dirName) {
     try {
       console.log(
-        `Delete zip ${this.srcBlob} successfully at ${new Date().toISOString()}`
+        `Start deleting zip ${this.srcBlob} at ${new Date().toISOString()}`
       );
       const directoryClient = this.shareClient.getDirectoryClient(dirName);
       const fileClient = directoryClient.getFileClient(this.srcBlob);
       await fileClient.delete();
+      console.log(`Deleted zip ${this.srcBlob} at ${new Date().toISOString()}`);
     } catch (error) {
       console.log(error);
       console.log("Zip not found");
@@ -56,6 +60,7 @@ class FileManager {
 
   async syncCode(dirName) {
     try {
+      console.log(`Starting syncing code at ${new Date().toISOString()}`);
       await this.createDirectory(dirName);
     } catch (error) {
       console.log(error);
@@ -65,6 +70,7 @@ class FileManager {
       );
     } finally {
       await this.copyZip(dirName);
+      console.log(`Done syncing code at ${new Date().toISOString()}`);
     }
   }
   //     finally {
