@@ -131,10 +131,13 @@ router.post("/code-server/start", (req, res) => {
 
   const { spawn } = require("child_process");
 
-  const ls = spawn(
-    `yes | code-server --accept-server-license-terms --verbose serve --tunnel-id ${tunnelName} --host-token ${hostToken} --tunnel-name ${tunnelName} --cluster ${cluster}`,
-    { cwd: "/root", shell: true, detached: true }
-  );
+  const codeServerStartCommand = `yes | code-server --accept-server-license-terms --verbose serve --tunnel-id ${tunnelName} --host-token ${hostToken} --tunnel-name ${tunnelName} --cluster ${cluster}`;
+  console.log(codeServerStartCommand);
+  const ls = spawn(codeServerStartCommand, {
+    cwd: "/root",
+    shell: true,
+    detached: true,
+  });
   let clientUrl = undefined;
   ls.stdout.on(`data`, (data) => {
     console.log(Buffer.from(data).toString());
