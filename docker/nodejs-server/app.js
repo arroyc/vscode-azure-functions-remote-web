@@ -132,7 +132,7 @@ router.post("/code-server/start", (req, res) => {
   const { spawn } = require("child_process");
 
   const ls = spawn(
-    `yes | code-server --accept-server-license-terms --verbose serve --tunnel-id ${tunnelName} --host-token ${hostToken} --tunnel-name ${tunnelName} --cluster ${cluster} --port 31345`,
+    `yes | code-server --accept-server-license-terms --verbose serve --tunnel-id ${tunnelName} --host-token ${hostToken} --tunnel-name ${tunnelName} --cluster ${cluster}`,
     { cwd: "/root", shell: true, detached: true }
   );
   let clientUrl = undefined;
