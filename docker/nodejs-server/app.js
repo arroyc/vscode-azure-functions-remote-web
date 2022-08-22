@@ -122,8 +122,13 @@ router.post("/code-server/start", (req, res) => {
   const tunnelId = req.body.tunnelId;
   const hostToken = req.body.hostToken;
   const tunnelName = req.body.tunnelName;
-
   const cluster = req.body.cluster;
+
+  checkExists("tunnelId", tunnelId);
+  checkExists("hostToken", hostToken);
+  checkExists("tunnelName", tunnelName);
+  checkExists("cluster", cluster);
+
   const { spawn } = require("child_process");
 
   const ls = spawn(
@@ -178,6 +183,12 @@ router.post("/code-server/start", (req, res) => {
 app.use("/limelight", router);
 
 console.log("endpoints defined..");
+
+function checkExists(name, value) {
+  if (!value) {
+    throw new Error(`variable ${name} is undefined!`);
+  }
+}
 
 app.listen(PORT, () => {
   console.log(`Example app listening on localhost: ${PORT} !`);
