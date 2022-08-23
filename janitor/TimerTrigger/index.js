@@ -39,10 +39,15 @@ module.exports = async function (context, timer) {
       const containerAppName = containerApp.name;
 
       try {
-        context.log(`Pinging container app ${containerAppName} ....`);
-        await axios.get(`https://${hostname}:443/limelight/ping`, {
-          timeout: 2000,
-        });
+        context.log(
+          `Container app ${containerAppName}'s provisioning state is ${containerApp.provisioningState}`
+        );
+        if (containerApp.provisioningState === "Succeeded") {
+          context.log(`Pinging container app ${containerAppName}...`);
+          await axios.get(`https://${hostname}:443/limelight/ping`, {
+            timeout: 2000,
+          });
+        }
       } catch (e) {
         // container app is down, delete it
         context.log(e);
