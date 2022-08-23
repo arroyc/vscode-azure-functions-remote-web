@@ -68,6 +68,7 @@ router.put("/delete/zips", async (req, res) => {
   //     res.send("deleting existing zips failed");
   //   }
   // }, 2000);
+  console.log("Deleting zips...");
 
   const fsPromises = fs.promises;
   const DIR = req.body.stagingDirectoryPath;
@@ -76,11 +77,13 @@ router.put("/delete/zips", async (req, res) => {
     for (let file of filesInDirectory) {
       if (file.endsWith("zip")) {
         fs.unlinkSync(DIR + file);
-        console.log("Removed: " + file);
+        console.log(`Removed ${file}`);
       }
     }
+    console.log("Existing zips deleted");
     res.send("Existing zips deleted");
   } catch (error) {
+    console.log("Deleting existing zips failed");
     console.log("ERROR: " + error);
     res.send("deleting existing zips failed");
   }
@@ -132,7 +135,7 @@ router.post("/code-server/start", (req, res) => {
   const { spawn } = require("child_process");
 
   const codeServerStartCommand = `yes | code-server --accept-server-license-terms --verbose serve --tunnel-id ${tunnelName} --host-token ${hostToken} --tunnel-name ${tunnelName} --cluster ${cluster}`;
-  console.log(codeServerStartCommand);
+  console.log(`Starting code-server: ${codeServerStartCommand}`);
   const ls = spawn(codeServerStartCommand, {
     cwd: "/root",
     shell: true,
