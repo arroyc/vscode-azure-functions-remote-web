@@ -1,9 +1,13 @@
-const { ManagedIdentityCredential } = require("@azure/identity");
+const {
+  // ManagedIdentityCredential,
+  DefaultAzureCredential,
+} = require("@azure/identity");
 const { ContainerAppsAPIClient } = require("@azure/arm-appcontainers");
 const { default: axios } = require("axios");
-let cred = new ManagedIdentityCredential(
-  "24132823-22c0-487e-bd77-648ad2226994"
-);
+// let cred = new ManagedIdentityCredential(
+//   "24132823-22c0-487e-bd77-648ad2226994"
+// );
+let cred = new DefaultAzureCredential();
 const subscriptionId = "edc48857-dd0b-4085-a2a9-5e7df12bd2fd";
 const resourceGroupName = "limelight";
 let containerAppClient = new ContainerAppsAPIClient(cred, subscriptionId);
@@ -18,9 +22,10 @@ module.exports = async function (context, timer) {
     containerApps =
       containerAppClient.containerApps.listByResourceGroup("limelight");
   } catch (e) {
-    cred = new ManagedIdentityCredential(
-      "24132823-22c0-487e-bd77-648ad2226994"
-    );
+    // cred = new ManagedIdentityCredential(
+    //   "24132823-22c0-487e-bd77-648ad2226994"
+    // );
+    cred = new DefaultAzureCredential();
     containerAppClient = new ContainerAppsAPIClient(cred, subscriptionId);
     containerApps =
       containerAppClient.containerApps.listByResourceGroup("limelight");

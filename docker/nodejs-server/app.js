@@ -158,14 +158,6 @@ router.post("/code-server/start", (req, res) => {
     if (url_Ind >= 0) {
       clientUrl = data.toString().substring(url_Ind);
     }
-    // const url_Ind = data.indexOf("https");
-    // if (url_Ind >= 0) {
-    //   clientUrl = data.toString().substring(url_Ind);
-    //   if (!returned) {
-    //     returned = true;
-    //     res.send("code server started");
-    //   }
-    // }
   });
 
   ls.on("close", (code) => {
