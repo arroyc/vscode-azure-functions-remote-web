@@ -74,8 +74,8 @@ export namespace Basis {
   ): Promise<Tunnel> {
     const tunnelRequestOptions: TunnelRequestOptions = {
       includePorts: true,
-      scopes: ["manage"],
-      tokenScopes: ["manage"],
+      scopes: ["host"],
+      tokenScopes: ["host"],
     };
 
     const foundTunnel = await tunnelManagementClient.getTunnel(
@@ -155,7 +155,7 @@ export namespace Basis {
         let tunnelAccessControlEntry: TunnelAccessControlEntry = {
           type: TunnelAccessControlEntryType.Anonymous,
           subjects: [],
-          scopes: ["manage"],
+          scopes: ["host"],
         };
 
         const tunnel: Tunnel = {
@@ -166,7 +166,7 @@ export namespace Basis {
           },
         };
         let tunnelRequestOptions: TunnelRequestOptions = {
-          tokenScopes: ["manage"],
+          tokenScopes: ["host"],
           includePorts: true,
         };
 
