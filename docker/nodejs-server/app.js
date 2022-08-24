@@ -3,6 +3,7 @@ const cors = require("cors");
 const app = express();
 const router = express.Router();
 const AdmZip = require("adm-zip");
+var sanitize = require("sanitize-filename");
 const fs = require("fs");
 console.log("modules imported..");
 app.use(cors());
@@ -103,15 +104,19 @@ router.put("/staging", async (req, res) => {
           "/" +
           zipFileName
       );
-      const file = new AdmZip(deploymentDirectoryPath + "/" + zipFileName);
+      var zipLocation = deploymentDirectoryPath + "/" + zipFileName;
+      zipLocation = sanitize(zipLocation);
+      const file = new AdmZip(zipLocation);
       file.extractAllTo(stagingDirectoryPath);
       const timestamp = Date.now();
       var newFileName = zipFileName;
       var arr = newFileName.split(".");
       newFileName = arr[0] + timestamp.toString() + "." + arr[1];
+      var newZipLocation = deploymentDirectoryPath + "/" + newFileName;
+      newZipLocation = sanitize(newZipLocation);
       await fs.promises.rename(
-        deploymentDirectoryPath + "/" + zipFileName,
-        deploymentDirectoryPath + "/" + newFileName
+        zipLocation,
+        newZipLocation
       );
       console.log("Successfully finished staging call");
       res.send("Renamed zip to " + newFileName);
