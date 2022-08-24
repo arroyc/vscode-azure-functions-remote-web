@@ -33,9 +33,9 @@ app.use((err, req, res, next) => {
   res.status(500).send(err);
 });
 
-const managedCred = new ManagedIdentityCredential(
-  "acf5c5a9-bccf-479e-aa83-c97d0afcc37a"
-);
+// const managedCred = new ManagedIdentityCredential(
+//   "acf5c5a9-bccf-479e-aa83-c97d0afcc37a"
+// );
 const defaultCred = new DefaultAzureCredential();
 
 const secretManager = new SecretManager(
@@ -59,7 +59,7 @@ let fileManager;
 })();
 
 const containerAppManager = new ContainerAppsManager(
-  managedCred,
+  defaultCred,
   subscriptionId
 );
 

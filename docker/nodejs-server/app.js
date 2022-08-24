@@ -68,6 +68,7 @@ router.put("/delete/zips", async (req, res) => {
   //     res.send("deleting existing zips failed");
   //   }
   // }, 2000);
+  console.log("Deleting zips...");
 
   const fsPromises = fs.promises;
   const DIR = req.body.stagingDirectoryPath;
@@ -76,11 +77,13 @@ router.put("/delete/zips", async (req, res) => {
     for (let file of filesInDirectory) {
       if (file.endsWith("zip")) {
         fs.unlinkSync(DIR + file);
-        console.log("Removed: " + file);
+        console.log(`Removed ${file}`);
       }
     }
+    console.log("Existing zips deleted");
     res.send("Existing zips deleted");
   } catch (error) {
+    console.log("Deleting existing zips failed");
     console.log("ERROR: " + error);
     res.send("deleting existing zips failed");
   }
@@ -123,14 +126,22 @@ router.post("/code-server/start", (req, res) => {
   const tunnelId = req.body.tunnelId;
   const hostToken = req.body.hostToken;
   const tunnelName = req.body.tunnelName;
-
   const cluster = req.body.cluster;
+
+  checkExists("tunnelId", tunnelId);
+  checkExists("hostToken", hostToken);
+  checkExists("tunnelName", tunnelName);
+  checkExists("cluster", cluster);
+
   const { spawn } = require("child_process");
 
-  const ls = spawn(
-    `yes | code-server --accept-server-license-terms --verbose serve --tunnel-id ${tunnelName} --host-token ${hostToken} --tunnel-name ${tunnelName} --cluster ${cluster} --port 31345`,
-    { cwd: "/root", shell: true, detached: true }
-  );
+  const codeServerStartCommand = `yes | code-server --accept-server-license-terms --verbose serve --tunnel-id ${tunnelName} --host-token ${hostToken} --tunnel-name ${tunnelName} --cluster ${cluster}`;
+  console.log(`Starting code-server: ${codeServerStartCommand}`);
+  const ls = spawn(codeServerStartCommand, {
+    cwd: "/root",
+    shell: true,
+    detached: true,
+  });
   let clientUrl = undefined;
   ls.stdout.on(`data`, (data) => {
     console.log(Buffer.from(data).toString());
@@ -148,14 +159,6 @@ router.post("/code-server/start", (req, res) => {
     if (url_Ind >= 0) {
       clientUrl = data.toString().substring(url_Ind);
     }
-    // const url_Ind = data.indexOf("https");
-    // if (url_Ind >= 0) {
-    //   clientUrl = data.toString().substring(url_Ind);
-    //   if (!returned) {
-    //     returned = true;
-    //     res.send("code server started");
-    //   }
-    // }
   });
 
   ls.on("close", (code) => {
@@ -179,6 +182,12 @@ router.post("/code-server/start", (req, res) => {
 app.use("/limelight", router);
 
 console.log("endpoints defined..");
+
+function checkExists(name, value) {
+  if (!value) {
+    throw new Error(`variable ${name} is undefined!`);
+  }
+}
 
 app.listen(PORT, () => {
   console.log(`Example app listening on localhost: ${PORT} !`);
