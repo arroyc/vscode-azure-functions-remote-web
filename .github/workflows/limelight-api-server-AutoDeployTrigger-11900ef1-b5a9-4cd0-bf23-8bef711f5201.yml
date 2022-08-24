@@ -56,5 +56,5 @@ jobs:
         with:
           inlineScript: |
             az config set extension.use_dynamic_install=yes_without_prompt
-            az containerapp registry set -n limelight-api-server -g limelight --server vscodedev.azurecr.io --username  ${{ secrets.LIMELIGHTAPISERVER_REGISTRY_USERNAME }} --password ${{ secrets.LIMELIGHTAPISERVER_REGISTRY_PASSWORD }}
-            az containerapp update -n limelight-api-server -g limelight --image vscodedev.azurecr.io/limelight-api-server:${{ github.sha }}
+            az containerapp registry set -n limelight-api-server -g 290459317 --server vscodedev.azurecr.io --username  ${{ secrets.LIMELIGHTAPISERVER_REGISTRY_USERNAME }} --password ${{ secrets.LIMELIGHTAPISERVER_REGISTRY_PASSWORD }}
+            az containerapp update -n limelight-api-server -g 290459317 --image vscodedev.azurecr.io/limelight-api-server:${{ github.sha }}
