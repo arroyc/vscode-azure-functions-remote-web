@@ -8,7 +8,7 @@ on:
       [ main ]
     paths:
     - 'docker/api-server/**'
-    - '.github/workflows/limelight-api-server-AutoDeployTrigger-4fee73d4-ddd3-4fa8-b6b8-a274dd22b18f.yml'
+    - '.github/workflows/limelight-api-server-AutoDeployTrigger-11900ef1-b5a9-4cd0-bf23-8bef711f5201.yml'
 
   # Allow mannually trigger 
   workflow_dispatch:      
