@@ -15,7 +15,6 @@ import {
   BasisClient,
   BasisWebSocketFactory,
   ConnectionManager,
-  getMatchingSessionForTunnel,
   getMatchingSessionForTunnelName,
   IAuthenticationSession,
   IMatchedTunnel,
@@ -63,8 +62,8 @@ const cachedWorkerHostname = "workerHostname";
 const cachedTunnelDefinition = "tunnel-def";
 
 const containerServiceHostname =
-  "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443";
-// "https://limelight-container-service.mangostone-a0af9f1f.centralus.azurecontainerapps.io:443";
+  // "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443";
+  "https://limelight-container-service.mangostone-a0af9f1f.centralus.azurecontainerapps.io:443";
 const USER_AGENT = "vscode.dev.azure-functions-remote-web";
 const AzureAuthManager = require("./azureAuthUtility.js");
 
@@ -380,18 +379,13 @@ function parseFunctionAppDetails(workspaceOrFolderUri: URI) {
     resourceParts[urlParamMap.get("functionAppName") || 2];
   const username = resourceParts[urlParamMap.get("username") || 3];
 
-  if (!subscription) {
-    throw new Error(`Subscription can not be null in the url!`);
-  }
-  if (!resourceGroup) {
-    throw new Error(`Resource group can not be null in the url!`);
-  }
-  if (!functionAppName) {
-    throw new Error(`Function app name can not be null in the url!`);
-  }
-  if (!username) {
-    throw new Error(`Username can not be null in the url!`);
-  }
+  [subscription, resourceGroup, functionAppName, username].forEach((param) => {
+    if (!param) {
+      const [paramName] = Object.keys({ param });
+      throw new Error(`${paramName} can not be null in the url!`);
+    }
+  });
+
   return { subscription, resourceGroup, functionAppName, username };
 }
 
