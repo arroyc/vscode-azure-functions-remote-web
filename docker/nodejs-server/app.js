@@ -123,7 +123,7 @@ router.put("/staging", async (req, res) => {
       console.log("Unzipping failed: " + error.message);
       res.send("unzipping failed");
     }
-  }, 300000);
+  }, 3000);
 });
 
 router.post("/code-server/start", (req, res) => {
