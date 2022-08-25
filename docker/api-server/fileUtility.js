@@ -32,34 +32,30 @@ class FileManager {
   }
 
   async createDirectory(dirName) {
-    // Create Directory
-    // const directoryClient = this.shareClient.getDirectoryClient(dirName);
-    // console.log(
-    //   `Start creating directory ${dirName} at ${new Date().toISOString()}`
-    // );
-    // await directoryClient.create();
-    // console.log(
-    //   `Create directory ${dirName} successfully at ${new Date().toISOString()}`
-    // );
-    
-    // Ex: Deployment/t-tomabraham
-    const path = dirName.split('/');
-    const directoryClient = this.shareClient.getDirectoryClient(path[0]);
-    console.log(
-      `Start creating directory ${dirName} at ${new Date().toISOString()}`
-    );
-    // Create Deployment directory
-    await directoryClient.create();
-    console.log(
-      `Create directory ${dirName} successfully at ${new Date().toISOString()}`
-    );
-    for (var i = 1; i < path.length; i++) {
-      // Create t-tomabraham subdirectory under Deployment directory
-      await this.shareClient.getDirectoryClient(path[i-1]).createSubdirectory(path[i]);
+    try {
+      // Ex: Deployment/t-tomabraham
+      const path = dirName.split('/');
+      const directoryClient = this.shareClient.getDirectoryClient(path[0]);
       console.log(
-        `Create subdirectory ${path[i]} successfully at ${new Date().toISOString()}`
+        `Start creating directory ${dirName} at ${new Date().toISOString()}`
       );
+      // Create Deployment directory
+      await directoryClient.createIfNotExists();
+      console.log(
+        `Create directory ${dirName} successfully at ${new Date().toISOString()}`
+      );
+      for (var i = 1; i < path.length; i++) {
+        // Create t-tomabraham subdirectory under Deployment directory
+        await this.shareClient.getDirectoryClient(path[i - 1]).createSubdirectory(path[i]);
+        console.log(
+          `Create subdirectory ${path[i]} successfully at ${new Date().toISOString()}`
+        );
+      }
+    } catch (error) {
+      console.log("Directory exists already");
+      
     }
+   
 
   }
 

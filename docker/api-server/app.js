@@ -209,6 +209,9 @@ router.post("/file/sync", async (req, res) => {
     );
     await fileManager.syncCode(`Deployment/${username}`);
 
+    // Create user directory under staging folder if it doesn't exist
+    await fileManager.createDirectory(`Staging/${username}`);
+    
     const reqBody = {
       deploymentDirectoryPath: `/${volumeMountingFolder}/Deployment/${username}`,
       stagingDirectoryPath: `/${volumeMountingFolder}/Staging/${username}`,
