@@ -106,7 +106,8 @@ router.put("/staging", async (req, res) => {
       );
       const zipLocation = deploymentDirectoryPath + "/" + zipFileName;
       const file = new AdmZip(zipLocation);
-      file.extractAllTo(stagingDirectoryPath, true);
+      // file.extractAllTo(stagingDirectoryPath, true);
+      file.extractAllTo(stagingDirectoryPath);
       const timestamp = Date.now();
       var newFileName = zipFileName;
       var arr = newFileName.split(".");
