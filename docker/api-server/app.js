@@ -3,10 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const uuid = require("uuid");
 
-const {
-  ManagedIdentityCredential,
-  DefaultAzureCredential,
-} = require("@azure/identity");
+const { DefaultAzureCredential } = require("@azure/identity");
 
 // Custom modules
 const SecretManager = require("./secretUtility.js");
@@ -17,9 +14,9 @@ const PORT = 443;
 // Env vars
 const subscriptionId = "edc48857-dd0b-4085-a2a9-5e7df12bd2fd";
 const resourceGroupName = "limelight";
-const environmentName = "limelight-container-app-env";
+const managedEnvironmentName = "limelight-container-app-env";
+const volumeMountingFolder = "functionapp";
 const storageName = "limelightfilestorage";
-const shareName = "limelight";
 const { default: axios } = require("axios");
 
 // Env initialization
@@ -33,9 +30,6 @@ app.use((err, req, res, next) => {
   res.status(500).send(err);
 });
 
-// const managedCred = new ManagedIdentityCredential(
-//   "acf5c5a9-bccf-479e-aa83-c97d0afcc37a"
-// );
 const defaultCred = new DefaultAzureCredential();
 
 const secretManager = new SecretManager(
@@ -52,7 +46,6 @@ let fileManager;
   accountKey = await secretManager.getSecret("ll-sa-keyy");
   registryP = await secretManager.getSecret("ll-registry-pword");
   connStr = await secretManager.getSecret("ll-conn-str");
-  //TODO: srcBlobUrl move to key vault
 
   // Init objects requiring secrets
   fileManager = new FileManager(accountKey, registryP, connStr);
@@ -121,8 +114,7 @@ router.post("/session/start", async (req, res) => {
         ],
       },
       location: "Central US",
-      managedEnvironmentId:
-        "/subscriptions/edc48857-dd0b-4085-a2a9-5e7df12bd2fd/resourceGroups/limelight/providers/Microsoft.App/managedEnvironments/limelight-container-app-env",
+      managedEnvironmentId: `/subscriptions/edc48857-dd0b-4085-a2a9-5e7df12bd2fd/resourceGroups/limelight/providers/Microsoft.App/managedEnvironments/${managedEnvironmentName}`,
       template: {
         containers: [
           {
@@ -135,7 +127,7 @@ router.post("/session/start", async (req, res) => {
             volumeMounts: [
               {
                 volumeName: "cx-app-vol",
-                mountPath: "/functionapp",
+                mountPath: `/${volumeMountingFolder}`,
               },
             ],
           },
@@ -199,7 +191,7 @@ router.post("/file/sync", async (req, res) => {
 
     // call delete all existing zips endpoint (delete preexisting zips)
     const requestBody = {
-      stagingDirectoryPath: `/functionapp/Deployment/${username}/`,
+      stagingDirectoryPath: `/${volumeMountingFolder}/Deployment/${username}/`,
     };
     console.log(
       `${requestId} Starting deleting zips at hostname: ${hostname} at ${new Date().toISOString()}`
@@ -218,8 +210,8 @@ router.post("/file/sync", async (req, res) => {
     await fileManager.syncCode(`Deployment/${username}`);
 
     const reqBody = {
-      deploymentDirectoryPath: `/functionapp/Deployment/${username}`,
-      stagingDirectoryPath: `/functionapp/Staging/${username}`,
+      deploymentDirectoryPath: `/${volumeMountingFolder}/Deployment/${username}`,
+      stagingDirectoryPath: `/${volumeMountingFolder}/Staging/${username}`,
       zipFileName: "funcapppy.zip",
     };
     // Call staging endpoint here

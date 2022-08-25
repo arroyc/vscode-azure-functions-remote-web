@@ -64,6 +64,7 @@ const cachedTunnelDefinition = "tunnel-def";
 
 const containerServiceHostname =
   "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443";
+// "https://limelight-container-service.mangostone-a0af9f1f.centralus.azurecontainerapps.io:443";
 const USER_AGENT = "vscode.dev.azure-functions-remote-web";
 const AzureAuthManager = require("./azureAuthUtility.js");
 
@@ -371,7 +372,7 @@ function parseFunctionAppDetails(workspaceOrFolderUri: URI) {
   ) {
     throw new Error("Please enter a valid url!");
   }
-  const resourceParts = workspaceOrFolderUri.authority.split("/");
+  const resourceParts = workspaceOrFolderUri.authority.split("+");
 
   const subscription = resourceParts[urlParamMap.get("subscription") || 0];
   const resourceGroup = resourceParts[urlParamMap.get("resourceGroup") || 1];
