@@ -9,6 +9,7 @@
   "dependencies": {
     "@azure/arm-appcontainers": "^1.0.0",
     "@azure/identity": "^2.1.0",
-    "axios": "^0.27.2"
+    "axios": "^0.27.2",
+    "p-retry": "^5.1.1"
   }
 }

@@ -45,7 +45,7 @@ module.exports = async function (context, timer) {
         if (containerApp.provisioningState === "Succeeded") {
           context.log(`Pinging container app ${containerAppName}...`);
           await axios.get(`https://${hostname}:443/limelight/ping`, {
-            timeout: 2000,
+            timeout: 10000,
           });
         }
       } catch (e) {
