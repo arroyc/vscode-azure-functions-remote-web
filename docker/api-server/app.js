@@ -190,19 +190,19 @@ router.post("/file/sync", async (req, res) => {
     // then unzip the zip from deploy folder into Staging folder
 
     // call delete all existing zips endpoint (delete preexisting zips)
-    // const requestBody = {
-    //   stagingDirectoryPath: `/${volumeMountingFolder}/Deployment/${username}/`,
-    // };
-    // console.log(
-    //   `${requestId} Starting deleting zips at hostname: ${hostname} at ${new Date().toISOString()}`
-    // );
-    // await axios.put(
-    //   `https://${hostname}:443/limelight/delete/zips`,
-    //   requestBody
-    // );
-    // console.log(
-    //   `${requestId} Done deleting zips at hostname: ${hostname} at ${new Date().toISOString()}`
-    // );
+    const requestBody = {
+      stagingDirectoryPath: `/${volumeMountingFolder}/Deployment/${username}/`,
+    };
+    console.log(
+      `${requestId} Starting deleting zips at hostname: ${hostname} at ${new Date().toISOString()}`
+    );
+    await axios.put(
+      `https://${hostname}:443/limelight/delete/zips`,
+      requestBody
+    );
+    console.log(
+      `${requestId} Done deleting zips at hostname: ${hostname} at ${new Date().toISOString()}`
+    );
     // call file sync method
     console.log(
       `${requestId} Starting copying zip at hostname: ${hostname} at ${new Date().toISOString()}`
