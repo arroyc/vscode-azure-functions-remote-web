@@ -4,10 +4,7 @@ const axios = require("axios");
 class FileManager {
   constructor(connStr, srcBlob, srcURL, shareName) {
     this.srcBlob = srcBlob;
-    this.srcCopyURL = srcURL;
-      // "https://limelightfilestorage.blob.core.windows.net/scm-releases/funcapppy.zip?sp=r&st=2022-08-18T19:52:51Z&se=2027-05-09T03:52:51Z&sv=2021-06-08&sr=b&sig=GTIR2JNDQ3EU6XL%2FP4QklilnAOoYlT9EdH5uYPQa%2BAg%3D";
-    // "https://limelightfilestorage.blob.core.windows.net/scm-releases/funcapppy.zip?sp=r&st=2022-08-11T16:54:19Z&se=2022-11-30T01:54:19Z&spr=https&sv=2021-06-08&sr=b&sig=PCwQGpM7BcMLGK4ZTpYKQAnt%2BhqeEj%2BecQf%2FzsDVtn8%3D";
-    
+    this.srcCopyURL = srcURL;   
     const share = new ShareClient(connStr, shareName);
     share.createIfNotExists();
     this.shareClient = ShareServiceClient.fromConnectionString(
