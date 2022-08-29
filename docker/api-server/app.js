@@ -181,8 +181,8 @@ router.post("/file/sync", async (req, res) => {
   try {
     const hostname = req.body.hostname;
     const username = req.body.username;
-    const connStr = req.body.storageAccountConnectionString;
-    const accountKey = req.body.storageAccountKey;
+    const connStr = req.body.connStr;
+    const accountKey = req.body.accountKey;
     const srcURL = req.body.srcURL;
     let splitURL = srcURL.split("?");
     splitURL = splitURL[0].split("/");
