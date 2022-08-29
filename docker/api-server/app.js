@@ -16,7 +16,8 @@ const subscriptionId = "edc48857-dd0b-4085-a2a9-5e7df12bd2fd";
 const resourceGroupName = "limelight";
 const managedEnvironmentName = "limelight-container-app-env";
 const volumeMountingFolder = "functionapp";
-const storageName = "limelightfilestorage";
+// const storageName = "limelightfilestorage";
+const storageName = "limelight8947";
 const { default: axios } = require("axios");
 
 // Env initialization
@@ -37,18 +38,18 @@ const secretManager = new SecretManager(
   defaultCred
 );
 
-let accountKey;
+// let accountKey;
 let registryP;
-let connStr;
+// let connStr;
 let fileManager;
 
 (async () => {
-  accountKey = await secretManager.getSecret("ll-sa-keyy");
+  // accountKey = await secretManager.getSecret("ll-sa-keyy");
   registryP = await secretManager.getSecret("ll-registry-pword");
-  connStr = await secretManager.getSecret("ll-conn-str");
+  // connStr = await secretManager.getSecret("ll-conn-str");
 
-  // Init objects requiring secrets
-  fileManager = new FileManager(accountKey, registryP, connStr);
+  // // Init objects requiring secrets
+  // fileManager = new FileManager(accountKey, registryP, connStr);
 })();
 
 const containerAppManager = new ContainerAppsManager(
@@ -180,6 +181,13 @@ router.post("/file/sync", async (req, res) => {
   try {
     const hostname = req.body.hostname;
     const username = req.body.username;
+    const connStr = req.body.storageAccountConnectionString;
+    const accountKey = req.body.storageAccountKey;
+    const srcURL = req.body.srcURL;
+    let splitConnStr = connStr.split("?");
+    splitConnStr = splitConnStr[0].split("/");
+    const srcBlob = splitConnStr[splitConnStr.length - 1];
+    const shareName = "limelightfs";
     console.log(
       `${requestId} Starting sync file at hostname: ${hostname} at ${new Date().toISOString()}`
     );
@@ -207,11 +215,15 @@ router.post("/file/sync", async (req, res) => {
     console.log(
       `${requestId} Starting copying zip at hostname: ${hostname} at ${new Date().toISOString()}`
     );
+
+    // Init file manager obj using user-specific params
+    fileManager =  new FileManager(connStr, srcBlob, srcURL, shareName);
+
     await fileManager.syncCode(`Deployment/${username}`);
 
     // Create user directory under staging folder if it doesn't exist
     await fileManager.createDirectory(`Staging/${username}`);
-    
+
     const reqBody = {
       deploymentDirectoryPath: `/${volumeMountingFolder}/Deployment/${username}`,
       stagingDirectoryPath: `/${volumeMountingFolder}/Staging/${username}`,

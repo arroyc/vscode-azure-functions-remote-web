@@ -133,8 +133,8 @@ export default async function doRoute(
     managementAccessToken
   );
 
-  // Only for if the function app is a new app
-  let storageAccountConnectionString, storageAccountKey;
+  // Only get connection string if function app already exists
+  let storageAccountConnectionString, storageAccountKey, srcURL;
   if (!isNewApp) {
     console.log(`Function app ${functionAppName} is an existing app`);
     storageAccountConnectionString =
@@ -144,6 +144,12 @@ export default async function doRoute(
         functionAppName,
         managementAccessToken
       );
+    srcURL = await getFunctionAppSrcURL(
+      subscription,
+      resourceGroup,
+      functionAppName,
+      managementAccessToken
+    );
     storageAccountKey = parseStorageAccountKey(
       storageAccountConnectionString,
       storageAccountKey
@@ -219,6 +225,9 @@ export default async function doRoute(
         {
           username,
           hostname: workerHostname,
+          storageAccountConnectionString,
+          storageAccountKey,
+          srcURL,
         }
       );
       console.log(`Cx function app files are synced: ${res}`);
@@ -395,6 +404,9 @@ async function getFunctionAppStorageAccountConnectionString(
   functionAppName: string,
   managementAccessToken: any
 ) {
+  console.log("HERE");
+  console.log("Bearer " + managementAccessToken);
+  // SUBSCRIPTION SHOULD BE SUBSCRIPTION ID
   const url = `https://management.azure.com/subscriptions/${subscription}/resourceGroups/${resourceGroup}/providers/Microsoft.Web/sites/${functionAppName}/config/appsettings/list?api-version=2021-02-01`;
   console.log(`Retrieving function app storage account connection string...`);
   const { data } = await axios.post(url, "", {
@@ -405,6 +417,25 @@ async function getFunctionAppStorageAccountConnectionString(
   const connStr = data["properties"]["AzureWebJobsStorage"];
   console.log(`Function app storage account connection string retrieved.`);
   return connStr;
+}
+
+async function getFunctionAppSrcURL(
+  subscription: string,
+  resourceGroup: string,
+  functionAppName: string,
+  managementAccessToken: any
+) {
+  // SUBSCRIPTION SHOULD BE SUBSCRIPTION ID
+  const url = `https://management.azure.com/subscriptions/${subscription}/resourceGroups/${resourceGroup}/providers/Microsoft.Web/sites/${functionAppName}/config/appsettings/list?api-version=2021-02-01`;
+  console.log(`Retrieving function app src url...`);
+  const { data } = await axios.post(url, "", {
+    headers: {
+      Authorization: "Bearer " + managementAccessToken,
+    },
+  });
+  const srcURL = data["properties"]["WEBSITE_RUN_FROM_PACKAGE"];
+  console.log(`Function app source URL retrieved. ` + srcURL);
+  return srcURL;
 }
 
 async function getMicrosoftAuthSessions(
