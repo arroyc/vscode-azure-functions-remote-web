@@ -220,7 +220,6 @@ export default async function doRoute(
       console.log(
         `Starting syncing cx function app files at ${workerHostname}..`
       );
-      console.log("SRC URL: " + srcURL);
       const res = await axios.post(
         `${containerServiceHostname}/limelight/file/sync`,
         {

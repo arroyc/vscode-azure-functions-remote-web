@@ -16,8 +16,8 @@ const subscriptionId = "edc48857-dd0b-4085-a2a9-5e7df12bd2fd";
 const resourceGroupName = "limelight";
 const managedEnvironmentName = "limelight-container-app-env";
 const volumeMountingFolder = "functionapp";
-const storageName = "limelightfilestorage";
-// const storageName = "limelight8947";
+// const storageName = "limelightfilestorage";
+const storageName = "limelight8947";
 const { default: axios } = require("axios");
 
 // Env initialization
@@ -237,7 +237,7 @@ router.post("/file/sync", async (req, res) => {
     );
     await axios.put(`https://${hostname}:443/limelight/staging`, reqBody);
     console.log(
-      `${requestId} Done unzipping to Deployment at hostname: ${hostname} at ${new Date().toISOString()}`
+      `${requestId} Done unzipping to Staging at hostname: ${hostname} at ${new Date().toISOString()}`
     );
     console.log(
       `${requestId} Done sync file at hostname: ${hostname} at ${new Date().toISOString()}`
