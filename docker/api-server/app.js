@@ -41,7 +41,7 @@ const secretManager = new SecretManager(
 // let accountKey;
 let registryP;
 // let connStr;
-let fileManager;
+// let fileManager;
 
 (async () => {
   // accountKey = await secretManager.getSecret("ll-sa-keyy");
@@ -184,9 +184,9 @@ router.post("/file/sync", async (req, res) => {
     const connStr = req.body.storageAccountConnectionString;
     const accountKey = req.body.storageAccountKey;
     const srcURL = req.body.srcURL;
-    let splitConnStr = connStr.split("?");
-    splitConnStr = splitConnStr[0].split("/");
-    const srcBlob = splitConnStr[splitConnStr.length - 1];
+    let splitURL = srcURL.split("?");
+    splitURL = splitURL[0].split("/");
+    const srcBlob = splitURL[splitURL.length - 1];
     const shareName = "limelightfs";
     console.log(
       `${requestId} Starting sync file at hostname: ${hostname} at ${new Date().toISOString()}`
@@ -217,7 +217,7 @@ router.post("/file/sync", async (req, res) => {
     );
 
     // Init file manager obj using user-specific params
-    fileManager =  new FileManager(connStr, srcBlob, srcURL, shareName);
+    const fileManager =  new FileManager(connStr, srcBlob, srcURL, shareName);
 
     await fileManager.syncCode(`Deployment/${username}`);
 
