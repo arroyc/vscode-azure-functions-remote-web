@@ -70,7 +70,8 @@ router.put("/delete/zips", async (req, res) => {
   //   }
   // }, 2000);
   console.log("Deleting zips...");
-
+  console.log(req.body.srcBlob);
+  console.log(req.body.srcURL);
   const fsPromises = fs.promises;
   const DIR = req.body.stagingDirectoryPath;
   try {

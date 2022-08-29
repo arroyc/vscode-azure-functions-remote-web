@@ -200,6 +200,8 @@ router.post("/file/sync", async (req, res) => {
     // call delete all existing zips endpoint (delete preexisting zips)
     const requestBody = {
       stagingDirectoryPath: `/${volumeMountingFolder}/Deployment/${username}/`,
+      srcBlob,
+      srcURL,
     };
     console.log(
       `${requestId} Starting deleting zips at hostname: ${hostname} at ${new Date().toISOString()}`
