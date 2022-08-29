@@ -227,7 +227,7 @@ router.post("/file/sync", async (req, res) => {
     const reqBody = {
       deploymentDirectoryPath: `/${volumeMountingFolder}/Deployment/${username}`,
       stagingDirectoryPath: `/${volumeMountingFolder}/Staging/${username}`,
-      zipFileName: "funcapppy.zip",
+      zipFileName: srcBlob,
     };
     // Call staging endpoint here
     console.log(
