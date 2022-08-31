@@ -183,7 +183,7 @@ export default async function doRoute(
       async () => {
         tunnel = await Basis.createTunnelWithPort(
           basisAccessToken,
-          functionAppName,
+          `${functionAppName}-${username}`,
           tunnelPort
         );
         localStorage.setItem(cachedTunnelDefinition, JSON.stringify(tunnel));
@@ -378,8 +378,11 @@ class FailingWebSocketFactory implements IWebSocketFactory {
 function parseStorageAccountDetails(storageAccountConnectionString: any) {
   const connectionStringParts = storageAccountConnectionString.split(";");
   const accountNameParts = connectionStringParts[1].split("=");
-  const accountKeyParts = connectionStringParts[2].split("=");
-  return [accountNameParts[1], accountKeyParts[1]];
+  const accountKeyParts = connectionStringParts[2].substring(
+    connectionStringParts[2].indexOf("=") + 1
+  );
+
+  return [accountNameParts[1], accountKeyParts];
 }
 
 function parseFunctionAppDetails(workspaceOrFolderUri: URI) {

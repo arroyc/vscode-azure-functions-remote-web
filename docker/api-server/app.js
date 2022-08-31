@@ -17,7 +17,8 @@ const resourceGroupName = "limelight";
 const managedEnvironmentName = "limelight-container-app-env";
 const volumeMountingFolder = "functionapp";
 // const storageName = "limelightfilestorage";
-const storageName = "limelight8947";
+// const storageName = "limelight8947";
+let storageName;
 const shareName = "limelightfs";
 const { default: axios } = require("axios");
 
@@ -72,6 +73,7 @@ router.post("/session/start", async (req, res) => {
     );
     const containerAppName =
       "ll" + uuid.v4().replace(/-/g, "").substring(0, 15);
+    storageName = req.body.storageName;
     const storageEnvelope = {
       properties: {
         azureFile: {
