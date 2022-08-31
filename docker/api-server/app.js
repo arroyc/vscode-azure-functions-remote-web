@@ -16,8 +16,8 @@ const subscriptionId = "edc48857-dd0b-4085-a2a9-5e7df12bd2fd";
 const resourceGroupName = "limelight";
 const managedEnvironmentName = "limelight-container-app-env";
 const volumeMountingFolder = "functionapp";
-const storageName = "limelightfilestorage";
-// const storageName = "limelight8947";
+// const storageName = "limelightfilestorage";
+const storageName = "limelight8947";
 const { default: axios } = require("axios");
 
 // Env initialization

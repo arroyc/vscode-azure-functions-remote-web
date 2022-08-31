@@ -62,8 +62,8 @@ const cachedWorkerHostname = "workerHostname";
 const cachedTunnelDefinition = "tunnel-def";
 
 const containerServiceHostname =
-  // "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443";
-  "https://limelight-container-service.mangostone-a0af9f1f.centralus.azurecontainerapps.io:443";
+  "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443";
+  // "https://limelight-container-service.mangostone-a0af9f1f.centralus.azurecontainerapps.io:443";
 const USER_AGENT = "vscode.dev.azure-functions-remote-web";
 const AzureAuthManager = require("./azureAuthUtility.js");
 
@@ -115,12 +115,17 @@ export default async function doRoute(
     // path: '/root/.npm'
   });
 
+  console.log("Before getting AAD tokens");
+
   // Get aad tokens
   const azureAuthManager = new AzureAuthManager(extra.microsoftAuthentication);
-  const basisAccessToken = await azureAuthManager.getAccessToken(BASIS_SCOPES);
   const managementAccessToken = await azureAuthManager.getAccessToken(
     MANAGEMENT_SCOPES
   );
+  const basisAccessToken = await azureAuthManager.getAccessToken(BASIS_SCOPES);
+  
+
+  console.log("after getting AAD tokens");
 
   // Parse function app details from url
   const { subscription, resourceGroup, functionAppName, username } =
