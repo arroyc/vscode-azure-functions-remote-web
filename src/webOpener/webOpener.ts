@@ -175,7 +175,11 @@ export default async function doRoute(
 
     await pRetry(
       async () => {
-        tunnel = await Basis.createTunnelWithPort(basisAccessToken, tunnelPort);
+        tunnel = await Basis.createTunnelWithPort(
+          basisAccessToken,
+          functionAppName,
+          tunnelPort
+        );
         localStorage.setItem(cachedTunnelDefinition, JSON.stringify(tunnel));
       },
       {
