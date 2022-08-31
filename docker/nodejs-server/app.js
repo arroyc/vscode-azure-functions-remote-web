@@ -50,25 +50,6 @@ router.get("/pat", (req, res) => {
 });
 
 router.put("/delete/zips", async (req, res) => {
-  // setTimeout(() => {
-  //   try {
-  //     const DIR = req.body.stagingDirectoryPath;
-  //     fs.readdir(DIR, (error, filesInDirectory) => {
-  //       if (error) throw error
-  //       for (let file of filesInDirectory) {
-  //         if (file.endsWith("zip")) {
-  //           fs.unlinkSync(DIR + file);
-  //           console.log("Removed: " + file);
-  //         }
-
-  //       }
-  //     })
-  //     res.send("deleted existing zips succesfully");
-  //   } catch (error) {
-  //     console.log(error.message);
-  //     res.send("deleting existing zips failed");
-  //   }
-  // }, 2000);
   console.log("Deleting zips...");
   console.log(req.body.srcBlob);
   console.log(req.body.srcURL);
@@ -149,17 +130,17 @@ router.post("/code-server/start", (req, res) => {
     console.log(Buffer.from(data).toString());
     // console.log(new Buffer(data).toString('ascii'))
     // return res.send(data)
-    const url_Ind = data.indexOf("https");
-    if (url_Ind >= 0) {
-      clientUrl = data.toString().substring(url_Ind);
+    const urlInd = data.indexOf("https");
+    if (urlInd >= 0) {
+      clientUrl = data.toString().substring(urlInd);
     }
   });
 
   ls.stderr.on("data", (data) => {
     console.error(`stderr: ${data}`);
-    const url_Ind = data.indexOf("https");
-    if (url_Ind >= 0) {
-      clientUrl = data.toString().substring(url_Ind);
+    const urlInd = data.indexOf("https");
+    if (urlInd >= 0) {
+      clientUrl = data.toString().substring(urlInd);
     }
   });
 

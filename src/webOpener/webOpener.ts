@@ -375,7 +375,10 @@ class FailingWebSocketFactory implements IWebSocketFactory {
   }
 }
 
-function parseStorageAccountDetails(storageAccountConnectionString: any) {
+function parseStorageAccountDetails(storageAccountConnectionString: string) {
+  if (!storageAccountConnectionString) {
+    throw new Error(`Storage account connection string is undefined!`);
+  }
   const connectionStringParts = storageAccountConnectionString.split(";");
   const accountNameParts = connectionStringParts[1].split("=");
   const accountKeyParts = connectionStringParts[2].substring(
