@@ -32,11 +32,20 @@ module.exports = async function (context, timer) {
     context.log(e);
   }
 
+  let numOfAppsToDelete = 2;
   for await (const containerAppPage of containerApps.byPage()) {
     for (const containerApp of containerAppPage) {
+      if (numOfAppsToDelete-- < 0) {
+        break;
+      }
+
       // check if containerApp is active
       const hostname = containerApp.configuration.ingress.fqdn;
       const containerAppName = containerApp.name;
+
+      if (!containerAppName.startsWith("ll")) {
+        continue;
+      }
 
       try {
         context.log(
@@ -44,8 +53,9 @@ module.exports = async function (context, timer) {
         );
         if (containerApp.provisioningState === "Succeeded") {
           context.log(`Pinging container app ${containerAppName}...`);
+          await setTimeout(25000);
           await axios.get(`https://${hostname}:443/limelight/ping`, {
-            timeout: 10000,
+            timeout: 5000,
           });
         }
       } catch (e) {

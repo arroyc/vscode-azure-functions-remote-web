@@ -44,6 +44,7 @@ let registryP;
 // let fileManager;
 
 (async () => {
+  // TODO: does this raise error if not authenticated
   // accountKey = await secretManager.getSecret("ll-sa-keyy");
   registryP = await secretManager.getSecret("ll-registry-pword");
   // connStr = await secretManager.getSecret("ll-conn-str");
@@ -219,7 +220,7 @@ router.post("/file/sync", async (req, res) => {
     );
 
     // Init file manager obj using user-specific params
-    const fileManager =  new FileManager(connStr, srcBlob, srcURL, shareName);
+    const fileManager = new FileManager(connStr, srcBlob, srcURL, shareName);
 
     await fileManager.syncCode(`Deployment/${username}`);
 

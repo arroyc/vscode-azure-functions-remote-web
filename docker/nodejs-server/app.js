@@ -114,10 +114,7 @@ router.put("/staging", async (req, res) => {
       var arr = newFileName.split(".");
       newFileName = arr[0] + timestamp.toString() + "." + arr[1];
       const newZipLocation = deploymentDirectoryPath + "/" + newFileName;
-      await fs.promises.rename(
-        zipLocation,
-        newZipLocation
-      );
+      await fs.promises.rename(zipLocation, newZipLocation);
       console.log("Successfully finished staging call");
       res.send("Renamed zip to " + newFileName);
     } catch (error) {
