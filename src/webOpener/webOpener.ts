@@ -183,7 +183,7 @@ export default async function doRoute(
       async () => {
         tunnel = await Basis.createTunnelWithPort(
           basisAccessToken,
-          `${functionAppName}-${username}`,
+          `${functionAppName}-${username}-${new Date().getMilliseconds()}`,
           tunnelPort
         );
         localStorage.setItem(cachedTunnelDefinition, JSON.stringify(tunnel));
