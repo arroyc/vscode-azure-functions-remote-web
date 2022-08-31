@@ -18,6 +18,7 @@ const managedEnvironmentName = "limelight-container-app-env";
 const volumeMountingFolder = "functionapp";
 // const storageName = "limelightfilestorage";
 const storageName = "limelight8947";
+const shareName = "limelightfs";
 const { default: axios } = require("axios");
 
 // Env initialization
@@ -71,16 +72,16 @@ router.post("/session/start", async (req, res) => {
     );
     const containerAppName =
       "ll" + uuid.v4().replace(/-/g, "").substring(0, 15);
-    // const storageEnvelope = {
-    //   properties: {
-    //     azureFile: {
-    //       accessMode: "ReadWrite",
-    //       accountKey: accountKey,
-    //       accountName: storageName,
-    //       shareName: shareName,
-    //     },
-    //   },
-    // };
+    const storageEnvelope = {
+      properties: {
+        azureFile: {
+          accessMode: "ReadWrite",
+          accountKey: req.body.accountKey,
+          accountName: req.body.storageName,
+          shareName: shareName,
+        },
+      },
+    };
 
     const containerAppEnvelope = {
       identity: {
@@ -148,12 +149,12 @@ router.post("/session/start", async (req, res) => {
       },
     };
 
-    // await containerAppManager.createOrUpdateManagedEnvStorage(
-    //   resourceGroupName,
-    //   environmentName,
-    //   storageName,
-    //   storageEnvelope
-    // );
+    await containerAppManager.createOrUpdateManagedEnvStorage(
+      resourceGroupName,
+      managedEnvironmentName,
+      storageName,
+      storageEnvelope
+    );
 
     const workerContainer =
       await containerAppManager.createOrUpdateContainerApp(
@@ -188,7 +189,6 @@ router.post("/file/sync", async (req, res) => {
     let splitURL = srcURL.split("?");
     splitURL = splitURL[0].split("/");
     const srcBlob = splitURL[splitURL.length - 1];
-    const shareName = "limelightfs";
     console.log(
       `${requestId} Starting sync file at hostname: ${hostname} at ${new Date().toISOString()}`
     );

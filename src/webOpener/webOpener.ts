@@ -63,7 +63,7 @@ const cachedTunnelDefinition = "tunnel-def";
 
 const containerServiceHostname =
   "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443";
-  // "https://limelight-container-service.mangostone-a0af9f1f.centralus.azurecontainerapps.io:443";
+// "https://limelight-container-service.mangostone-a0af9f1f.centralus.azurecontainerapps.io:443";
 const USER_AGENT = "vscode.dev.azure-functions-remote-web";
 const AzureAuthManager = require("./azureAuthUtility.js");
 
@@ -123,7 +123,6 @@ export default async function doRoute(
     MANAGEMENT_SCOPES
   );
   const basisAccessToken = await azureAuthManager.getAccessToken(BASIS_SCOPES);
-  
 
   console.log("after getting AAD tokens");
 
@@ -139,7 +138,10 @@ export default async function doRoute(
   );
 
   // Only get connection string if function app already exists
-  let storageAccountConnectionString, storageAccountKey, srcURL;
+  let storageAccountConnectionString,
+    storageAccountName,
+    storageAccountKey,
+    srcURL;
   if (!isNewApp) {
     console.log(`Function app ${functionAppName} is an existing app`);
     storageAccountConnectionString =
@@ -155,9 +157,8 @@ export default async function doRoute(
       functionAppName,
       managementAccessToken
     );
-    storageAccountKey = parseStorageAccountKey(
-      storageAccountConnectionString,
-      storageAccountKey
+    [storageAccountName, storageAccountKey] = parseStorageAccountDetails(
+      storageAccountConnectionString
     );
   }
 
@@ -215,6 +216,8 @@ export default async function doRoute(
         {
           // TODO: pass in custom container app name, if not exist, create one with the name otherwise return the info
           calledWhen: new Date().toISOString(),
+          storageName: storageAccountName,
+          accountKey: storageAccountKey,
         }
       );
       console.log("Limelight session is created..");
@@ -372,14 +375,11 @@ class FailingWebSocketFactory implements IWebSocketFactory {
   }
 }
 
-function parseStorageAccountKey(
-  storageAccountConnectionString: any,
-  storageAccountKey: any
-) {
+function parseStorageAccountDetails(storageAccountConnectionString: any) {
   const connectionStringParts = storageAccountConnectionString.split(";");
+  const accountNameParts = connectionStringParts[1].split("=");
   const accountKeyParts = connectionStringParts[2].split("=");
-  storageAccountKey = accountKeyParts[1];
-  return storageAccountKey;
+  return [accountNameParts[1], accountKeyParts[1]];
 }
 
 function parseFunctionAppDetails(workspaceOrFolderUri: URI) {
