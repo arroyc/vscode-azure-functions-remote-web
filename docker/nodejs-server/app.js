@@ -4,9 +4,7 @@ const app = express();
 const router = express.Router();
 const AdmZip = require("adm-zip");
 const sanitize = require("sanitize-filename");
-const { body } = require("express-validator");
 const fs = require("fs");
-const fsPromises = fs.promises;
 console.log("modules imported..");
 app.use(cors());
 // Constants
@@ -51,142 +49,129 @@ router.get("/pat", (req, res) => {
   return res.send("ok");
 });
 
-router.put(
-  "/delete/zips",
-  body("directoryPath").isLength({ min: 1 }),
-  async (req, res) => {
-    console.log(`Deleting zips in the directory ${req.body.directoryPath}`);
-    const directoryPath = req.body.directoryPath;
-    try {
-      await deleteZipFilesInDirectory(directoryPath);
-    } catch (error) {
-      console.log(
-        `Failed to delete zip files in the directory: ${directoryPath}`
-      );
-      console.log("ERROR: " + error);
-      res
-        .status(500)
-        .send(
-          `Failed to delete zip files in the directory: ${directoryPath}: ${error.message}`
-        );
+router.put("/delete/zips", async (req, res) => {
+  console.log("Deleting zips...");
+  console.log(req.body.srcBlob);
+  console.log(req.body.srcURL);
+  const fsPromises = fs.promises;
+  const DIR = req.body.stagingDirectoryPath;
+  try {
+    const filesInDirectory = await fsPromises.readdir(DIR);
+    for (let file of filesInDirectory) {
+      if (file.endsWith("zip")) {
+        fs.unlinkSync(DIR + file);
+        console.log(`Removed ${file}`);
+      }
     }
+    console.log("Existing zips deleted");
+    res.send("Existing zips deleted");
+  } catch (error) {
+    console.log("Deleting existing zips failed");
+    console.log("ERROR: " + error);
+    res.send("deleting existing zips failed");
   }
-);
+});
 
-router.put(
-  "/staging",
-  body("deploymentDirectoryPath").isLength({ min: 1 }),
-  body("stagingDirectoryPath").isLength({ min: 1 }),
-  body("zipFileName").isLength({ min: 1 }),
-  async (req, res) => {
-    // TODO: get rid of timeout
-    setTimeout(async () => {
-      try {
-        const deploymentDirectoryPath = req.body.deploymentDirectoryPath;
-        const stagingDirectoryPath = req.body.stagingDirectoryPath;
-        const zipFileName = req.body.zipFileName;
-
-        await extractZipContentToDirectory(
-          deploymentDirectoryPath,
-          stagingDirectoryPath,
+router.put("/staging", async (req, res) => {
+  setTimeout(async () => {
+    try {
+      const deploymentDirectoryPath = req.body.deploymentDirectoryPath;
+      const stagingDirectoryPath = req.body.stagingDirectoryPath;
+      const zipFileName = req.body.zipFileName;
+      console.log(
+        "Starting unzipping " +
+          zipFileName +
+          " at path: " +
+          deploymentDirectoryPath +
+          "/" +
           zipFileName
-        );
-        res.send(`Renamed zip to ${zipFileName}`);
-      } catch (error) {
-        console.log("Unzipping failed: " + error.message);
-        res.send("unzipping failed");
-      }
-    }, 3000);
-  }
-);
+      );
+      const zipLocation = deploymentDirectoryPath + "/" + zipFileName;
+      const file = new AdmZip(zipLocation);
+      // file.extractAllTo(stagingDirectoryPath, true);
+      file.extractAllTo(stagingDirectoryPath);
+      const timestamp = Date.now();
+      var newFileName = zipFileName;
+      var arr = newFileName.split(".");
+      newFileName = arr[0] + timestamp.toString() + "." + arr[1];
+      const newZipLocation = deploymentDirectoryPath + "/" + newFileName;
+      await fs.promises.rename(zipLocation, newZipLocation);
+      console.log("Successfully finished staging call");
+      res.send("Renamed zip to " + newFileName);
+    } catch (error) {
+      console.log("Unzipping failed: " + error.message);
+      res.send("unzipping failed");
+    }
+  }, 3000);
+});
 
-router.post(
-  "/code-server/start",
-  body("tunnelId").isLength({ min: 1 }),
-  body("hostToken").isLength({ min: 1 }),
-  body("tunnelName").isLength({ min: 1 }),
-  body("cluster").isLength({ min: 1 }),
-  (req, res) => {
-    const tunnelId = req.body.tunnelId;
-    const hostToken = req.body.hostToken;
-    const tunnelName = req.body.tunnelName;
-    const cluster = req.body.cluster;
+router.post("/code-server/start", (req, res) => {
+  const tunnelId = req.body.tunnelId;
+  const hostToken = req.body.hostToken;
+  const tunnelName = req.body.tunnelName;
+  const cluster = req.body.cluster;
 
-    const { spawn } = require("child_process");
+  checkExists("tunnelId", tunnelId);
+  checkExists("hostToken", hostToken);
+  checkExists("tunnelName", tunnelName);
+  checkExists("cluster", cluster);
 
-    const codeServerStartCommand = `yes | code-server --accept-server-license-terms --verbose serve --tunnel-id ${tunnelId} --host-token ${hostToken} --tunnel-name ${tunnelName} --cluster ${cluster}`;
-    console.log(`Starting code-server: ${codeServerStartCommand}`);
-    const ls = spawn(codeServerStartCommand, {
-      cwd: "/root",
-      shell: true,
-      detached: true,
-    });
-    let clientUrl = undefined;
-    ls.stdout.on(`data`, (data) => {
-      console.log(Buffer.from(data).toString());
-      const urlInd = data.indexOf("https");
-      if (urlInd >= 0) {
-        clientUrl = data.toString().substring(urlInd);
-      }
-    });
+  const { spawn } = require("child_process");
 
-    ls.stderr.on("data", (data) => {
-      console.error(`stderr: ${data}`);
-      const urlInd = data.indexOf("https");
-      if (urlInd >= 0) {
-        clientUrl = data.toString().substring(urlInd);
-      }
-    });
+  const codeServerStartCommand = `yes | code-server --accept-server-license-terms --verbose serve --tunnel-id ${tunnelName} --host-token ${hostToken} --tunnel-name ${tunnelName} --cluster ${cluster}`;
+  console.log(`Starting code-server: ${codeServerStartCommand}`);
+  const ls = spawn(codeServerStartCommand, {
+    cwd: "/root",
+    shell: true,
+    detached: true,
+  });
+  let clientUrl = undefined;
+  ls.stdout.on(`data`, (data) => {
+    console.log(Buffer.from(data).toString());
+    // console.log(new Buffer(data).toString('ascii'))
+    // return res.send(data)
+    const urlInd = data.indexOf("https");
+    if (urlInd >= 0) {
+      clientUrl = data.toString().substring(urlInd);
+    }
+  });
 
-    ls.on("close", (code) => {
-      console.log(`child process exited with code ${code}`);
-    });
+  ls.stderr.on("data", (data) => {
+    console.error(`stderr: ${data}`);
+    const urlInd = data.indexOf("https");
+    if (urlInd >= 0) {
+      clientUrl = data.toString().substring(urlInd);
+    }
+  });
 
-    setTimeout(() => {
-      if (clientUrl) {
-        res.status(200).send("code server started");
-      } else {
-        res.status(500).send("code server failed");
-      }
-    }, 15000);
-  }
-);
+  ls.on("close", (code) => {
+    console.log(`child process exited with code ${code}`);
+    // console.log(dataBuffer.toString())
+    // if (!returned) {
+    //   returned = true;
+    //   res.status(500).send(`child process exited with code ${code}`);
+    // }
+  });
+
+  setTimeout(() => {
+    if (clientUrl) {
+      res.status(200).send("code server started");
+    } else {
+      res.status(500).send("code server failed");
+    }
+  }, 15000);
+});
 
 app.use("/limelight", router);
 
 console.log("endpoints defined..");
 
+function checkExists(name, value) {
+  if (!value) {
+    throw new Error(`variable ${name} is undefined!`);
+  }
+}
+
 app.listen(PORT, () => {
   console.log(`Example app listening on localhost: ${PORT} !`);
 });
-
-async function deleteZipFilesInDirectory(directoryPath) {
-  const filesInDirectory = await fsPromises.readdir(directoryPath);
-  for (let file of filesInDirectory) {
-    if (file.endsWith("zip")) {
-      fs.unlinkSync(directoryPath + file);
-      console.log(`Removed ${file}`);
-    }
-  }
-  console.log(`Zip files in the directory ${directoryPath} are deleted`);
-}
-
-async function extractZipContentToDirectory(
-  sourceDirectory,
-  targetDirectory,
-  zipFileName
-) {
-  console.log(
-    `Starting unzipping ${zipFileName} at path: ${sourceDirectory}/${zipFileName}`
-  );
-  const zipLocation = sourceDirectory + "/" + zipFileName;
-  const file = new AdmZip(zipLocation);
-  file.extractAllTo(targetDirectory);
-  const timestamp = Date.now();
-  var newFileName = zipFileName;
-  var arr = newFileName.split(".");
-  newFileName = arr[0] + timestamp.toString() + "." + arr[1];
-  const newZipLocation = sourceDirectory + "/" + newFileName;
-  await fs.promises.rename(zipLocation, newZipLocation);
-  console.log("Successfully finished staging call");
-}

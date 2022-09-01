@@ -254,7 +254,7 @@ export default async function doRoute(
       const { data } = await axios.post(
         `https://${workerHostname}:443/limelight/code-server/start`,
         {
-          tunnelId: tunnel.name,
+          tunnelId: tunnel.tunnelId,
           hostToken: tunnel.token,
           tunnelName: tunnel.name,
           cluster: tunnel.clusterId,
