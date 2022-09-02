@@ -191,7 +191,8 @@ router.post(
       const srcURL = req.body.srcURL;
       const srcBlob = parseSourceBlob(srcURL);
       const fileManager = new FileManager(connStr, srcBlob, srcURL, shareName);
-
+      const deploymentDirectoryPath = `Deployment/${username}`;
+      const stagingDirectoryPath = `Staging/${username}`;
       console.log(
         `${requestId} Starting sync file at hostname: ${hostname} at ${new Date().toISOString()}`
       );
@@ -199,11 +200,16 @@ router.post(
       await deleteExistingDeploymentZips(username, srcBlob, srcURL, hostname);
 
       await fileManager.copyZipBetweenDirectories(
-        `Deployment/${username}`,
-        `Staging/${username}`
+        deploymentDirectoryPath,
+        stagingDirectoryPath
       );
 
-      await extractDeployZipContent(username, srcBlob, hostname);
+      await extractDeployZipContent(
+        srcBlob,
+        hostname,
+        deploymentDirectoryPath,
+        stagingDirectoryPath
+      );
       console.log(
         `${requestId} Done sync file at hostname: ${hostname} at ${new Date().toISOString()}`
       );
@@ -231,17 +237,22 @@ app.listen(serverPort, () => {
   );
 });
 
-async function extractDeployZipContent(username, srcBlob, hostname) {
+async function extractDeployZipContent(
+  srcBlob,
+  hostname,
+  deploymentDirectoryPath,
+  stagingDirectoryPath
+) {
   const reqBody = {
-    deploymentDirectoryPath: `/${volumeMountingFolder}/Deployment/${username}`,
-    stagingDirectoryPath: `/${volumeMountingFolder}/Staging/${username}`,
+    deploymentDirectoryPath: `/${volumeMountingFolder}/${deploymentDirectoryPath}`,
+    stagingDirectoryPath: `/${volumeMountingFolder}/${stagingDirectoryPath}`,
     zipFileName: srcBlob,
   };
   // Call staging endpoint here
   console.log(
     `Start unzipping to staging at hostname: ${hostname} at ${new Date().toISOString()}`
   );
-  await axios.put(`https://${hostname}:443/limelight/staging`, reqBody);
+  await axios.put(`https://${hostname}:443/limelight-worker/staging`, reqBody);
   console.log(
     `Done unzipping to Staging at hostname: ${hostname} at ${new Date().toISOString()}`
   );
@@ -261,7 +272,10 @@ async function deleteExistingDeploymentZips(
   console.log(
     `Starting deleting zips at hostname: ${hostname} at ${new Date().toISOString()}`
   );
-  await axios.put(`https://${hostname}:443/limelight/delete/zips`, requestBody);
+  await axios.put(
+    `https://${hostname}:443/limelight-worker/delete/zips`,
+    requestBody
+  );
   console.log(
     `Done deleting zips at hostname: ${hostname} at ${new Date().toISOString()}`
   );
