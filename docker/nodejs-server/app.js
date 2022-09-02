@@ -51,27 +51,50 @@ router.get("/pat", (req, res) => {
   return res.send("ok");
 });
 
-router.put(
-  "/delete/zips",
-  body("directoryPath").isLength({ min: 1 }),
-  async (req, res) => {
-    console.log(`Deleting zips in the directory ${req.body.directoryPath}`);
-    const directoryPath = req.body.directoryPath;
-    try {
-      await deleteZipFilesInDirectory(directoryPath);
-    } catch (error) {
-      console.log(
-        `Failed to delete zip files in the directory: ${directoryPath}`
-      );
-      console.log("ERROR: " + error);
-      res
-        .status(500)
-        .send(
-          `Failed to delete zip files in the directory: ${directoryPath}: ${error.message}`
-        );
+// router.put(
+//   "/delete/zips",
+//   body("directoryPath").isLength({ min: 1 }),
+//   async (req, res) => {
+//     console.log(`Deleting zips in the directory ${req.body.directoryPath}`);
+//     const directoryPath = req.body.directoryPath;
+//     try {
+//       await deleteZipFilesInDirectory(directoryPath);
+//     } catch (error) {
+//       console.log(
+//         `Failed to delete zip files in the directory: ${directoryPath}`
+//       );
+//       console.log("ERROR: " + error);
+//       res
+//         .status(500)
+//         .send(
+//           `Failed to delete zip files in the directory: ${directoryPath}: ${error.message}`
+//         );
+//     }
+//   }
+// );
+
+router.put("/delete/zips", async (req, res) => {
+  console.log("Deleting zips...");
+  console.log(req.body.srcBlob);
+  console.log(req.body.srcURL);
+  const fsPromises = fs.promises;
+  const DIR = req.body.directoryPath;
+  try {
+    const filesInDirectory = await fsPromises.readdir(DIR);
+    for (const file of filesInDirectory) {
+      if (file.endsWith("zip")) {
+        fs.unlinkSync(DIR + file);
+        console.log(`Removed ${file}`);
+      }
     }
+    console.log("Existing zips deleted");
+    res.send("Existing zips deleted");
+  } catch (error) {
+    console.log("Deleting existing zips failed");
+    console.log("ERROR: " + error);
+    res.send("deleting existing zips failed");
   }
-);
+});
 
 router.put(
   "/staging",
