@@ -4,7 +4,7 @@ const { default: axios } = require("axios");
 const { TableClient } = require("@azure/data-tables");
 
 let cred = new DefaultAzureCredential();
-const account = "limelightfilestorage";
+const account = "lljanitor";
 const tableName = "limelightworkerstatus";
 
 const subscriptionId = "edc48857-dd0b-4085-a2a9-5e7df12bd2fd";
@@ -66,7 +66,7 @@ module.exports = async function (context, timer) {
           `Container app ${containerAppName}'s provisioning state is ${containerApp.provisioningState}`
         );
         context.log(`Pinging container app ${containerAppName}...`);
-        await axios.get(`https://${hostname}:443/limelight/ping`, {
+        await axios.get(`https://${hostname}:443/limelight-worker/ping`, {
           timeout: 5000,
         });
         pingFailureCount = 0;
