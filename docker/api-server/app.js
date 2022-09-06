@@ -60,12 +60,14 @@ router.post(
   "/session/start",
   body("storageName").isLength({ min: 1 }),
   body("accountKey").isLength({ min: 1 }),
+  body("calledWhen").isLength({ min: 1 }),
   async (req, res) => {
     const requestId = uuid.v4().toString();
     try {
       console.log(
         `${requestId} Starting limelight session at time ${req.body.calledWhen}`
       );
+
       storageName = req.body.storageName;
       const containerAppName =
         "ll" + uuid.v4().replace(/-/g, "").substring(0, 15);
@@ -182,12 +184,14 @@ router.post(
   body("username").isLength({ min: 1 }),
   body("connStr").isLength({ min: 1 }),
   body("srcURL").isLength({ min: 1 }),
+  body("version").isLength({ min: 1 }),
   async (req, res) => {
     const requestId = uuid.v4().toString();
     try {
       const hostname = req.body.hostname;
       const username = req.body.username;
       const connStr = req.body.connStr;
+      const version = req.body.version;
       const srcURL = req.body.srcURL;
       const srcBlob = parseSourceBlob(srcURL);
       const fileManager = new FileManager(connStr, srcBlob, srcURL, shareName);
@@ -197,19 +201,24 @@ router.post(
         `${requestId} Starting sync file at hostname: ${hostname} at ${new Date().toISOString()}`
       );
 
-      await deleteExistingDeploymentZips(username, srcBlob, srcURL, hostname);
+      await Promise.all([
+        fileManager.createDirectory(deploymentDirectoryPath),
+        fileManager.createDirectory(stagingDirectoryPath),
+      ]);
 
-      await fileManager.copyZipBetweenDirectories(
-        deploymentDirectoryPath,
-        stagingDirectoryPath
-      );
+      if (version === "deploy") {
+        await deleteExistingDeploymentZips(username, srcBlob, srcURL, hostname);
 
-      await extractDeployZipContent(
-        srcBlob,
-        hostname,
-        deploymentDirectoryPath,
-        stagingDirectoryPath
-      );
+        await fileManager.copyZipFromUrlToDirectory(deploymentDirectoryPath);
+
+        await extractDeployZipContent(
+          srcBlob,
+          hostname,
+          deploymentDirectoryPath,
+          stagingDirectoryPath
+        );
+      }
+
       console.log(
         `${requestId} Done sync file at hostname: ${hostname} at ${new Date().toISOString()}`
       );

@@ -16,7 +16,7 @@ class FileManager {
       );
   }
 
-  async copyZip(dirName) {
+  async copyZipFromUrlToDirectory(dirName) {
     // Copy Zip
     console.log(
       `Start copying ${this.srcCopyURL} from ${this.srcBlob} to 
@@ -84,17 +84,12 @@ class FileManager {
       console.log(
         `Starting copying zip from directory ${deploymentDirectoryName} to directory ${stagingDirectoryName} at ${new Date().toISOString()}`
       );
-      await Promise.all([
-        this.createDirectory(deploymentDirectoryName),
-        this.createDirectory(stagingDirectoryName),
-      ]);
-    } catch (error) {
-      console.log(`Unexpected error when creating directory: ${error}`);
-    } finally {
-      await this.copyZip(deploymentDirectoryName);
+      await this.copyZipFromUrlToDirectory(deploymentDirectoryName);
       console.log(
         `Done copying function app zip to deployment directory ${deploymentDirectoryName} at ${new Date().toISOString()}`
       );
+    } catch (error) {
+      console.log(`Unexpected error when creating directory: ${error}`);
     }
   }
 }

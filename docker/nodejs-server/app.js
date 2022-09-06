@@ -90,10 +90,11 @@ router.put(
           stagingDirectoryPath,
           zipFileName
         );
+        console.log(`Renamed zip to ${zipFileName}`);
         res.send(`Renamed zip to ${zipFileName}`);
       } catch (error) {
-        console.log("Unzipping failed: " + error.message);
-        res.send("unzipping failed");
+        console.log(`Unzipping failed: ${error.message}`);
+        res.status(500).send(`Unzipping failed: ${error.message}`);
       }
     }, 3000);
   }
@@ -182,8 +183,8 @@ async function extractZipContentToDirectory(
   const file = new AdmZip(zipLocation);
   file.extractAllTo(targetDirectory);
   const timestamp = Date.now();
-  var newFileName = zipFileName;
-  var arr = newFileName.split(".");
+  let newFileName = zipFileName;
+  let arr = newFileName.split(".");
   newFileName = arr[0] + timestamp.toString() + "." + arr[1];
   const newZipLocation = sourceDirectory + "/" + newFileName;
   await fs.promises.rename(zipLocation, newZipLocation);
