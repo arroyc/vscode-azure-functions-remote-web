@@ -42,15 +42,13 @@ module.exports = async function (context, timer) {
           containerAppName,
           containerAppName
         );
-        context.log(
-          `Worker container app ${containerAppName} - ${
-            workerContainerAppRecord?.pingFailureCount || 0
-          }`
-        );
       } catch (e) {
         context.log(`${containerAppName} not recorded in table.`);
       }
 
+      context.log(
+        `Worker container app ${containerAppName} - ${workerContainerAppRecord.pingFailureCount}`
+      );
       let pingFailureCount = 0;
 
       if (!workerContainerAppRecord) {
@@ -60,7 +58,7 @@ module.exports = async function (context, timer) {
           pingFailureCount,
         });
       } else {
-        pingFailureCount = workerContainerAppRecord.pingFailureCount || 0;
+        pingFailureCount = workerContainerAppRecord.pingFailureCount;
       }
 
       try {
