@@ -17,7 +17,7 @@ const serverPort = 443;
 const subscriptionId = "edc48857-dd0b-4085-a2a9-5e7df12bd2fd";
 const resourceGroupName = "limelight";
 const managedEnvironmentName = "limelight-container-app-env";
-const volumeMountingFolder = "functionapp";
+const volumeMountingFolder = "code";
 const secretKeyVaultUrl = "https://limelight-key-vault.vault.azure.net/";
 const limelightContainerRegistryPwd = "ll-registry-pword";
 let storageName;
@@ -185,6 +185,7 @@ router.post(
   body("connStr").isLength({ min: 1 }),
   body("srcURL").isLength({ min: 1 }),
   body("version").isLength({ min: 1 }),
+  body("functionAppName").isLength({ min: 1 }),
   async (req, res) => {
     const requestId = uuid.v4().toString();
     try {
@@ -193,10 +194,11 @@ router.post(
       const connStr = req.body.connStr;
       const version = req.body.version;
       const srcURL = req.body.srcURL;
+      const functionAppName = req.body.functionAppName;
       const srcBlob = parseSourceBlob(srcURL);
       const fileManager = new FileManager(connStr, srcBlob, srcURL, shareName);
       const deploymentDirectoryPath = `Deployment/${username}`;
-      const stagingDirectoryPath = `Staging/${username}`;
+      const stagingDirectoryPath = `user/${username}/${functionAppName}`;
       console.log(
         `${requestId} Starting sync file at hostname: ${hostname} at ${new Date().toISOString()}`
       );
