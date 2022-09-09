@@ -459,7 +459,23 @@ async function getFunctionAppSrcURL(
       Authorization: "Bearer " + managementAccessToken,
     },
   });
-  const srcURL = data["properties"]["WEBSITE_RUN_FROM_PACKAGE"];
+  let srcURL;
+  // WRFP setting does not exist or is 0
+  if (data["properties"]["WEBSITE_RUN_FROM_PACKAGE"] == undefined || data["properties"]["WEBSITE_RUN_FROM_PACKAGE"] == 0) {
+    const scmURL = `https://${functionAppName}.scm.azurewebsites.net/api/settings`;
+    const { data } = await axios.get(scmURL, {
+      headers: {
+        Authorization: "Bearer " + managementAccessToken,
+      }
+    });
+    srcURL = data["SCM_RUN_FROM_PACKAGE"];
+  // WRFP setting is 1
+  } else if (data["properties"]["WEBSITE_RUN_FROM_PACKAGE"] == 1){
+    srcURL = data["properties"]["WEBSITE_CONTENTSHARE"]
+  } else {
+    srcURL = data["properties"]["WEBSITE_RUN_FROM_PACKAGE"];
+  }
+  // WRFP setting is URL
   console.log(`Function app source URL retrieved. ` + srcURL);
   return srcURL;
 }
