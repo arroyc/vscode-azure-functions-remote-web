@@ -241,6 +241,7 @@ export default async function doRoute(
         {
           username,
           hostname: workerHostname,
+          functionAppName,
           connStr: storageAccountConnectionString,
           accountKey: storageAccountKey,
           srcURL,
@@ -340,9 +341,11 @@ export default async function doRoute(
         query: new URLSearchParams({ uri: uri.toString() }).toString(),
       }),
     productConfiguration: {
-      extensionAllowedProposedApi: ["ms-toolsai.vscode-ai-remote-web"],
+      extensionAllowedProposedApi: [
+        "ms-toolsai.vscode-azure-functions-remote-web",
+      ],
       extensionEnabledApiProposals: {
-        "ms-toolsai.vscode-ai-remote-web": ["resolvers"],
+        "ms-toolsai.vscode-azure-functions-remote-web": ["resolvers"],
       },
     },
     windowIndicator: {
@@ -461,17 +464,20 @@ async function getFunctionAppSrcURL(
   });
   let srcURL;
   // WRFP setting does not exist or is 0
-  if (data["properties"]["WEBSITE_RUN_FROM_PACKAGE"] == undefined || data["properties"]["WEBSITE_RUN_FROM_PACKAGE"] == 0) {
+  if (
+    data["properties"]["WEBSITE_RUN_FROM_PACKAGE"] === undefined ||
+    data["properties"]["WEBSITE_RUN_FROM_PACKAGE"] === 0
+  ) {
     const scmURL = `https://${functionAppName}.scm.azurewebsites.net/api/settings`;
     const { data } = await axios.get(scmURL, {
       headers: {
         Authorization: "Bearer " + managementAccessToken,
-      }
+      },
     });
     srcURL = data["SCM_RUN_FROM_PACKAGE"];
-  // WRFP setting is 1
-  } else if (data["properties"]["WEBSITE_RUN_FROM_PACKAGE"] == 1){
-    srcURL = data["properties"]["WEBSITE_CONTENTSHARE"]
+    // WRFP setting is 1
+  } else if (data["properties"]["WEBSITE_RUN_FROM_PACKAGE"] === 1) {
+    srcURL = data["properties"]["WEBSITE_CONTENTSHARE"];
   } else {
     srcURL = data["properties"]["WEBSITE_RUN_FROM_PACKAGE"];
   }

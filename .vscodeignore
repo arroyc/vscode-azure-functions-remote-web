@@ -2,6 +2,8 @@
 .vscode-test-web/**
 src/**
 out/**
+demo/**
+.github/**
 node_modules/**
 .gitignore
 vsc-extension-quickstart.md
@@ -11,3 +13,5 @@ webpack.config.js
 **/.eslintrc.json
 **/*.map
 **/*.ts
+docker/**
+janitor/**
