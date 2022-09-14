@@ -1,9 +1,9 @@
 {
   "name": "vscode-azure-functions-remote-web",
   "displayName": "vscode-azure-functions-remote-web",
-  "publisher": "ms-toolsai",
+  "publisher": "ms-azuretools",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.67.0"
   },

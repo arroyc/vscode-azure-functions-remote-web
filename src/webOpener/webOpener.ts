@@ -62,8 +62,8 @@ const cachedWorkerHostname = "workerHostname";
 const cachedTunnelDefinition = "tunnel-def";
 
 const containerServiceHostname =
-  "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443";
-// "https://limelight-container-service.mangostone-a0af9f1f.centralus.azurecontainerapps.io:443";
+  // "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443";
+  "https://limelight-container-service.mangostone-a0af9f1f.centralus.azurecontainerapps.io:443";
 const USER_AGENT = "vscode.dev.azure-functions-remote-web";
 const AzureAuthManager = require("./azureAuthUtility.js");
 
@@ -139,11 +139,13 @@ export default async function doRoute(
     managementAccessToken
   );
 
+  console.log(`functionapp name ${functionAppName}`);
   // Only get connection string if function app already exists
   let storageAccountConnectionString,
     storageAccountName,
     storageAccountKey,
     srcURL;
+
   if (!isNewApp) {
     console.log(`Function app ${functionAppName} is an existing app`);
     storageAccountConnectionString =
@@ -221,6 +223,7 @@ export default async function doRoute(
           storageName: storageAccountName,
           accountKey: storageAccountKey,
           version,
+          functionAppName,
         }
       );
       console.log("Limelight session is created..");
@@ -342,10 +345,10 @@ export default async function doRoute(
       }),
     productConfiguration: {
       extensionAllowedProposedApi: [
-        "ms-toolsai.vscode-azure-functions-remote-web",
+        "ms-azuretools.vscode-azure-functions-remote-web",
       ],
       extensionEnabledApiProposals: {
-        "ms-toolsai.vscode-azure-functions-remote-web": ["resolvers"],
+        "ms-azuretools.vscode-azure-functions-remote-web": ["resolvers"],
       },
     },
     windowIndicator: {
@@ -356,12 +359,15 @@ export default async function doRoute(
     remoteAuthority: loadUri.authority,
   };
 
-  route!.onDidCreateWorkbench!.runCommands = [
-    {
-      command: "mypanel.start",
-      args: [isNewApp],
-    },
-  ];
+  if (isNewApp) {
+    route!.onDidCreateWorkbench!.runCommands = [
+      {
+        command: "azureFunctions.createNewProject",
+        args: [],
+      },
+    ];
+  }
+
   route.workspace = { folderUri: loadUri };
 }
 
