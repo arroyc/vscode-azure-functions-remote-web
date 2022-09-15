@@ -249,6 +249,7 @@ export default async function doRoute(
           accountKey: storageAccountKey,
           srcURL,
           version,
+          isNewApp,
         }
       );
       console.log(`Cx function app files are synced: ${res}`);
