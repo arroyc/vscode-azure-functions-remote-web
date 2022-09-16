@@ -140,29 +140,30 @@ export default async function doRoute(
   );
 
   console.log(`functionapp name ${functionAppName}`);
+  console.log(`${functionAppName} is an ${isNewApp ? "new" : "existing"} app`);
   // Only get connection string if function app already exists
   let storageAccountConnectionString,
     storageAccountName,
     storageAccountKey,
     srcURL;
 
-  if (!isNewApp) {
-    console.log(`Function app ${functionAppName} is an existing app`);
-    storageAccountConnectionString =
-      await getFunctionAppStorageAccountConnectionString(
-        subscription,
-        resourceGroup,
-        functionAppName,
-        managementAccessToken
-      );
-    srcURL = await getFunctionAppSrcURL(
+  storageAccountConnectionString =
+    await getFunctionAppStorageAccountConnectionString(
       subscription,
       resourceGroup,
       functionAppName,
       managementAccessToken
     );
-    [storageAccountName, storageAccountKey] = parseStorageAccountDetails(
-      storageAccountConnectionString
+  [storageAccountName, storageAccountKey] = parseStorageAccountDetails(
+    storageAccountConnectionString
+  );
+
+  if (!isNewApp) {
+    srcURL = await getFunctionAppSrcURL(
+      subscription,
+      resourceGroup,
+      functionAppName,
+      managementAccessToken
     );
   }
 
@@ -216,7 +217,6 @@ export default async function doRoute(
       console.log("Starting limelight session..");
       const containerInfo = await axios.post(
         `${containerServiceHostname}/limelight/session/start`,
-        // "http://localhost:443/limelight/session/start",
         {
           // TODO: pass in custom container app name, if not exist, create one with the name otherwise return the info
           calledWhen: new Date().toISOString(),
