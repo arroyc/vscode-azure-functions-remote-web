@@ -515,7 +515,7 @@ async function isFunctionAppNew(
   managementAccessToken: string
 ) {
   console.log(`Determining if ${functionAppName} is new`);
-  const url = `https://management.azure.com/subscriptions/${subscription}/resourceGroups/${resourceGroup}/providers/Microsoft.Web/sites/${functionAppName}?api-version=2021-02-01`;
+  const url = `https://management.azure.com/subscriptions/${subscription}/resourceGroups/${resourceGroup}/providers/Microsoft.Web/sites/${functionAppName}/functions?api-version=2022-03-01`;
 
   // checking to see if func app exists
   try {
@@ -526,12 +526,12 @@ async function isFunctionAppNew(
     });
     console.log(data);
 
-    return false;
+    return data.value.length === 0;
 
     // error means no such app exists in storage
   } catch (error) {
     // console.log("new func app");
     console.log(error);
-    return true;
+    throw error;
   }
 }
