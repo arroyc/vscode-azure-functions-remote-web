@@ -64,6 +64,7 @@ const cachedTunnelDefinition = "tunnel-def";
 const containerServiceHostname =
   // "https://limelight-api-server.salmonfield-d8375633.centralus.azurecontainerapps.io:443";
   "https://limelight-container-service.mangostone-a0af9f1f.centralus.azurecontainerapps.io:443";
+// "http://localhost:443";
 const USER_AGENT = "vscode.dev.azure-functions-remote-web";
 const AzureAuthManager = require("./azureAuthUtility.js");
 
@@ -140,7 +141,7 @@ export default async function doRoute(
   );
 
   console.log(`functionapp name ${functionAppName}`);
-  console.log(`${functionAppName} is an ${isNewApp ? "new" : "existing"} app`);
+  console.log(`${functionAppName} is a ${isNewApp ? "new" : "existing"} app`);
   // Only get connection string if function app already exists
   let storageAccountConnectionString,
     storageAccountName,
@@ -198,6 +199,7 @@ export default async function doRoute(
           console.log(
             `Deleting inactive tunnels as max tunnel count limit for user reached`
           );
+          console.error(error);
           return await Basis.deleteInactiveTunnels(basisAccessToken);
         },
         retries: 3,
@@ -209,82 +211,49 @@ export default async function doRoute(
   console.log("Tunnel is found..");
   console.log(tunnel);
   const tunnelActive = await Basis.isActive(basisAccessToken, tunnel);
+  let workerHostname: string | null =
+    localStorage.getItem(cachedWorkerHostname);
   if (!tunnelActive) {
     // If not, call api server to create and return a new container app
     localStorage.removeItem(cachedWorkerHostname);
-    let workerHostname: string | undefined = undefined;
-    try {
-      console.log("Starting limelight session..");
-      const containerInfo = await axios.post(
-        `${containerServiceHostname}/limelight/session/start`,
-        {
-          // TODO: pass in custom container app name, if not exist, create one with the name otherwise return the info
-          calledWhen: new Date().toISOString(),
-          storageName: storageAccountName,
-          accountKey: storageAccountKey,
-          version,
-          functionAppName,
-        }
-      );
-      console.log("Limelight session is created..");
-      console.log(containerInfo);
-      workerHostname = containerInfo.data.data.configuration.ingress.fqdn;
-      if (workerHostname) {
-        localStorage.setItem(cachedWorkerHostname, workerHostname);
-      } else {
-        throw new Error("Hostname is empty");
-      }
+    workerHostname = await createLimelightSession(
+      storageAccountName,
+      storageAccountKey,
+      version,
+      functionAppName
+    );
 
-      console.log(
-        `Starting syncing cx function app files at ${workerHostname}..`
-      );
-
-      const res = await axios.post(
-        `${containerServiceHostname}/limelight/file/sync`,
-        {
-          username,
-          hostname: workerHostname,
-          functionAppName,
-          connStr: storageAccountConnectionString,
-          accountKey: storageAccountKey,
-          srcURL,
-          version,
-          isNewApp,
-        }
-      );
-      console.log(`Cx function app files are synced: ${res}`);
-    } catch (error) {
-      console.log("Failed to create limelight session..");
-      console.log(error);
-      throw new Error("Failed to create limelight session..");
+    if (!workerHostname) {
+      throw new Error("Hostname is empty");
     }
 
-    try {
-      console.log(`Starting code server at ${workerHostname}..`);
-      const { data } = await axios.post(
-        `https://${workerHostname}:443/limelight-worker/code-server/start`,
-        {
-          tunnelId: tunnel.name,
-          hostToken: tunnel.token,
-          tunnelName: tunnel.name,
-          cluster: tunnel.clusterId,
-        }
-      );
-      console.log(`Started code server in limelight: ${data}`);
-      setInterval(async () => {
-        // const status = await axios.get('http://localhost:443/ping');
-        const status = await axios.get(
-          `https://${workerHostname}:443/limelight-worker/pat`
-        );
-        console.log(status);
-        localStorage.removeItem(cachedWorkerHostname);
-        //TODO: if failed, container app is gone, create new container app with same name
-      }, 5000);
-    } catch (error) {
-      console.log(`Failed to start code server: ${error}`);
-      //TODO: if failed, container app is gone, create new container app with same name
-      localStorage.removeItem(cachedWorkerHostname);
+    await syncFile(
+      username,
+      workerHostname,
+      functionAppName,
+      storageAccountConnectionString,
+      storageAccountKey,
+      srcURL,
+      version,
+      isNewApp
+    );
+
+    await startCodeServer(workerHostname, tunnel);
+  } else {
+    if (!workerHostname) {
+      throw new Error("Hostname is empty");
     }
+
+    await syncFile(
+      username,
+      workerHostname,
+      functionAppName,
+      storageAccountConnectionString,
+      storageAccountKey,
+      srcURL,
+      version,
+      isNewApp
+    );
   }
 
   let match: IMatchedTunnel;
@@ -313,6 +282,7 @@ export default async function doRoute(
     };
     return;
   }
+
   const manager = new ConnectionManager({
     tunnel: match.tunnel,
     port: tunnel.remotePort,
@@ -390,6 +360,103 @@ class FailingWebSocketFactory implements IWebSocketFactory {
   }
 }
 
+async function startCodeServer(workerHostname: string, tunnel: any) {
+  try {
+    console.log(`Starting code server at ${workerHostname}..`);
+    const { data } = await axios.post(
+      `https://${workerHostname}:443/limelight-worker/code-server/start`,
+      {
+        tunnelId: tunnel.name,
+        hostToken: tunnel.token,
+        tunnelName: tunnel.name,
+        cluster: tunnel.clusterId,
+      }
+    );
+    console.log(`Started code server in limelight: ${data}`);
+    setInterval(async () => {
+      // const status = await axios.get('http://localhost:443/ping');
+      const status = await axios.get(
+        `https://${workerHostname}:443/limelight-worker/pat`
+      );
+      console.log(status);
+      localStorage.removeItem(cachedWorkerHostname);
+      //TODO: if failed, container app is gone, create new container app with same name
+    }, 5000);
+  } catch (error) {
+    console.log(`Failed to start code server: ${error}`);
+    //TODO: if failed, container app is gone, create new container app with same name
+    localStorage.removeItem(cachedWorkerHostname);
+  }
+}
+
+async function createLimelightSession(
+  storageAccountName: string,
+  storageAccountKey: string,
+  version: string,
+  functionAppName: string
+) {
+  let workerHostname;
+  try {
+    console.log("Starting limelight session..");
+    const containerInfo = await axios.post(
+      `${containerServiceHostname}/limelight/session/start`,
+      {
+        // TODO: pass in custom container app name, if not exist, create one with the name otherwise return the info
+        calledWhen: new Date().toISOString(),
+        storageName: storageAccountName,
+        accountKey: storageAccountKey,
+        version,
+        functionAppName,
+      }
+    );
+    console.log("Limelight session is created..");
+    console.log(containerInfo);
+    workerHostname = containerInfo.data.data.configuration.ingress.fqdn;
+    if (workerHostname) {
+      localStorage.setItem(cachedWorkerHostname, workerHostname);
+    }
+  } catch (error) {
+    console.log("Failed to create limelight session..");
+    console.log(error);
+    throw new Error("Failed to create limelight session..");
+  }
+  return workerHostname;
+}
+
+async function syncFile(
+  username: string,
+  workerHostname: string,
+  functionAppName: string,
+  storageAccountConnectionString: any,
+  storageAccountKey: string,
+  srcURL: any,
+  version: string,
+  isNewApp: boolean
+) {
+  try {
+    console.log(
+      `Starting syncing cx function app files at ${workerHostname}..`
+    );
+    const res = await axios.post(
+      `${containerServiceHostname}/limelight/file/sync`,
+      {
+        username,
+        hostname: workerHostname,
+        functionAppName,
+        connStr: storageAccountConnectionString,
+        accountKey: storageAccountKey,
+        srcURL,
+        version,
+        isNewApp,
+      }
+    );
+    console.log(`Cx function app files are synced: ${res}`);
+  } catch (e) {
+    console.log(`Failed to sync cx function app files`);
+    throw e;
+  }
+}
+
 function parseVersion(version: string) {
   const versionParts = version.split("=");
   if (!versionParts || versionParts.length < 2) {
@@ -441,7 +508,6 @@ async function getFunctionAppStorageAccountConnectionString(
   functionAppName: string,
   managementAccessToken: any
 ) {
-  console.log("Bearer " + managementAccessToken);
   // SUBSCRIPTION SHOULD BE SUBSCRIPTION ID
   const url = `https://management.azure.com/subscriptions/${subscription}/resourceGroups/${resourceGroup}/providers/Microsoft.Web/sites/${functionAppName}/config/appsettings/list?api-version=2021-02-01`;
   console.log(`Retrieving function app storage account connection string...`);
