@@ -189,7 +189,7 @@ export default async function doRoute(
       async () => {
         tunnel = await Basis.createTunnelWithPort(
           basisAccessToken,
-          `${functionAppName}-${username}-${new Date().getMilliseconds()}`,
+          `${functionAppName.toLowerCase()}-${username.toLowerCase()}-${new Date().getMilliseconds()}`,
           tunnelPort
         );
         localStorage.setItem(cachedTunnelDefinition, JSON.stringify(tunnel));
@@ -399,6 +399,7 @@ async function createLimelightSession(
   try {
     console.log("Starting limelight session..");
     const containerInfo = await axios.post(
+      // `${containerServiceHostname}/limelight/session/start`,
       `${containerServiceHostname}/limelight/session/start`,
       {
         // TODO: pass in custom container app name, if not exist, create one with the name otherwise return the info

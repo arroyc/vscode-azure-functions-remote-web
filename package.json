@@ -3,7 +3,7 @@
   "displayName": "vscode-azure-functions-remote-web",
   "publisher": "ms-azuretools",
   "description": "",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "engines": {
     "vscode": "^1.67.0"
   },
